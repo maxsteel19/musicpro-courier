@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Music Pro Tour - Courier Management System
 
 Sistema de gestión de envíos y logística desarrollado con Django para controlar paquetes, sucursales, entregas, incidencias y seguimiento operativo.
@@ -110,3 +111,7 @@ Proyecto desarrollado para evaluación académica / entregable de programación 
 ## Licencia
 
 Uso académico.
+=======
+# musicpro-courier
+Sistema de courier punto a punto para Music Pro Tour, desarrollado con Django (INACAP - Programación Backend)
+>>>>>>> ea04b0394091b438a96734deb1ad498953339b19
