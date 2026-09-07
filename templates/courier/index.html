@@ -1,0 +1,1172 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ empresa }} - {{ titulo }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e63946;
+            --primary-dark: #c1121f;
+            --secondary: #1d3557;
+            --accent: #457b9d;
+            --dark: #0d1117;
+            --darker: #010409;
+            --card-bg: #161b22;
+            --card-border: #30363d;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --success: #2ea043;
+            --warning: #d29922;
+            --info: #58a6ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--darker);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .navbar-custom {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+            border-bottom: 2px solid var(--primary);
+            padding: 0.5rem 0;
+        }
+
+        .navbar-custom .navbar-brand {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.3rem;
+        }
+
+        .navbar-custom .navbar-brand img {
+            height: 45px;
+            margin-right: 10px;
+        }
+
+        .navbar-custom .nav-link {
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
+            border-radius: 6px;
+        }
+
+        .navbar-custom .nav-link:hover,
+        .navbar-custom .nav-link.active {
+            color: var(--text-primary);
+            background: rgba(230, 57, 70, 0.15);
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, rgba(29, 53, 87, 0.9) 0%, rgba(13, 17, 23, 0.95) 100%),
+                        url('https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=1920') center/cover;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, var(--primary) 0%, transparent 50%);
+            opacity: 0.1;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .hero-title span {
+            color: var(--primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title span {
+            color: var(--primary);
+        }
+
+        .section-divider {
+            width: 60px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 2px;
+            margin-bottom: 2rem;
+        }
+
+        .card-dark {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .card-dark:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(230, 57, 70, 0.15);
+        }
+
+        .card-dark .card-body { padding: 1.5rem; }
+
+        .card-dark .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-dark .card-title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-dark .card-text {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .icon-bg-primary { background: rgba(230, 57, 70, 0.15); color: var(--primary); }
+        .icon-bg-info { background: rgba(88, 166, 255, 0.15); color: var(--info); }
+        .icon-bg-success { background: rgba(46, 160, 67, 0.15); color: var(--success); }
+        .icon-bg-warning { background: rgba(210, 153, 34, 0.15); color: var(--warning); }
+        .icon-bg-secondary { background: rgba(69, 123, 157, 0.15); color: var(--accent); }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .kpi-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            background: var(--card-border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar-custom .bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .bar-primary { background: var(--primary); }
+        .bar-success { background: var(--success); }
+        .bar-warning { background: var(--warning); }
+        .bar-info { background: var(--info); }
+
+        .envio-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .envio-card:hover {
+            border-color: var(--accent);
+        }
+
+        .badge-estado {
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-preparacion { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .badge-despachado { background: rgba(88, 166, 255, 0.2); color: var(--info); }
+        .badge-transito { background: rgba(69, 123, 157, 0.2); color: var(--accent); }
+        .badge-entregado { background: rgba(46, 160, 67, 0.2); color: var(--success); }
+        .badge-pendiente { background: rgba(139, 148, 158, 0.2); color: var(--text-secondary); }
+        .badge-en_ruta { background: rgba(69, 123, 157, 0.2); color: var(--accent); }
+
+        .badge-prioridad {
+            padding: 0.25rem 0.6rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-baja { background: rgba(139, 148, 158, 0.2); color: var(--text-secondary); }
+        .badge-media { background: rgba(88, 166, 255, 0.2); color: var(--info); }
+        .badge-alta { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .badge-urgente { background: rgba(230, 57, 70, 0.2); color: var(--primary); }
+
+        .sucursal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .sucursal-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .sucursal-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            background: rgba(88, 166, 255, 0.15);
+            color: var(--info);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .tracking-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .tracking-timeline::before {
+            content: '';
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--card-border);
+        }
+
+        .tracking-step {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .tracking-step::before {
+            content: '';
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--card-border);
+            border: 2px solid var(--card-bg);
+        }
+
+        .tracking-step.active::before {
+            background: var(--primary);
+            box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.3);
+        }
+
+        .tracking-step.completed::before {
+            background: var(--success);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        .feature-item i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-item h5 {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .feature-item p {
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            margin: 0;
+        }
+
+        .search-box {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            display: flex;
+            align-items: center;
+            max-width: 400px;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-primary);
+            padding: 0.4rem;
+            width: 100%;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-box button {
+            background: var(--primary);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .search-box button:hover {
+            background: var(--primary-dark);
+        }
+
+        .footer {
+            background: var(--dark);
+            border-top: 1px solid var(--card-border);
+            padding: 3rem 0 1.5rem;
+            margin-top: 4rem;
+        }
+
+        .footer-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .footer-link:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid var(--card-border);
+            padding-top: 1.5rem;
+            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .nav-icon-section {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 1rem 0;
+        }
+
+        .nav-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
+            transition: all 0.3s;
+            text-decoration: none;
+            color: var(--text-secondary);
+            min-width: 140px;
+        }
+
+        .nav-icon-item:hover {
+            background: rgba(230, 57, 70, 0.1);
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .nav-icon-item.active {
+            background: rgba(230, 57, 70, 0.15);
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .nav-icon-item i {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-icon-item span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .table-dark-custom {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-dark-custom thead th {
+            background: rgba(255,255,255,0.05);
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 0.85rem 1rem;
+        }
+
+        .table-dark-custom tbody td {
+            border-bottom: 1px solid var(--card-border);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            padding: 0.85rem 1rem;
+            vertical-align: middle;
+        }
+
+        .table-dark-custom tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-dark-custom tbody tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .sidebar-stats {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .stat-row:last-child { border-bottom: none; }
+
+        .alert-custom {
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            border: 1px solid;
+        }
+
+        .alert-custom.alert-warning-custom {
+            background: rgba(210, 153, 34, 0.1);
+            border-color: rgba(210, 153, 34, 0.3);
+            color: var(--warning);
+        }
+
+        .alert-custom.alert-danger-custom {
+            background: rgba(230, 57, 70, 0.1);
+            border-color: rgba(230, 57, 70, 0.3);
+            color: var(--primary);
+        }
+
+        .alert-custom.alert-info-custom {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: rgba(88, 166, 255, 0.3);
+            color: var(--info);
+        }
+
+        .btn-primary-custom {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary-custom:hover {
+            background: var(--primary-dark);
+            color: white;
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 0.5rem 1.25rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-outline-custom:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title { font-size: 2rem; }
+            .kpi-value { font-size: 1.6rem; }
+            .nav-icon-item { min-width: 100px; padding: 0.75rem 1rem; }
+            .nav-icon-item i { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'courier:index' %}">
+                <div style="width:42px;height:42px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;">
+                    <i class="fas fa-truck" style="font-size:1.2rem;color:white;"></i>
+                </div>
+                <div>
+                    <div style="font-size:1.1rem;line-height:1.2;">Music Pro Tour</div>
+                    <div style="font-size:0.7rem;color:var(--text-secondary);font-weight:400;">Courier (Proveedor - Cliente) | Tour {{ ano }}</div>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars" style="color:var(--text-primary);"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'index' %}active{% endif %}" href="{% url 'courier:index' %}">
+                            <i class="fas fa-home me-1"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'courier:dashboard' %}">
+                            <i class="fas fa-chart-line me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'seguimiento' %}active{% endif %}" href="{% url 'courier:seguimiento' %}">
+                            <i class="fas fa-map-marker-alt me-1"></i> Seguimiento
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'envios' %}active{% endif %}" href="{% url 'courier:envios' %}">
+                            <i class="fas fa-box me-1"></i> Envíos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'sucursales' %}active{% endif %}" href="{% url 'courier:sucursales' %}">
+                            <i class="fas fa-store me-1"></i> Sucursales
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'reportes' %}active{% endif %}" href="{% url 'courier:reportes' %}">
+                            <i class="fas fa-chart-bar me-1"></i> Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <div class="search-box">
+                            <input type="text" placeholder="Buscar envío...">
+                            <button><i class="fas fa-search" style="font-size:0.75rem;"></i></button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Nav Icons Section -->
+    <section style="background:var(--dark);border-bottom:1px solid var(--card-border);padding:1rem 0;">
+        <div class="container">
+            <div class="nav-icon-section">
+                <a href="#" class="nav-icon-item">
+                    <i class="fas fa-warehouse"></i>
+                    <span>Bodega Principal</span>
+                </a>
+                <a href="{% url 'courier:sucursales' %}" class="nav-icon-item">
+                    <i class="fas fa-store"></i>
+                    <span>Sucursales y Franquicias</span>
+                </a>
+                <a href="{% url 'courier:index' %}" class="nav-icon-item active">
+                    <i class="fas fa-truck"></i>
+                    <span>Courier (Proveedor - Cliente)</span>
+                </a>
+                <a href="#" class="nav-icon-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Sistema de Pagos</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container position-relative">
+            <div class="row align-items-center">
+                <div class="col-lg-7">
+                    <div class="mb-2" style="color:var(--primary);font-weight:600;font-size:0.9rem;">
+                        <i class="fas fa-truck me-2"></i> TOUR {{ ano }}
+                    </div>
+                    <h1 class="hero-title">
+                        Music Pro Tour<br>
+                        <span style="font-size:0.6em;">Courier (Proveedor - Cliente)</span>
+                    </h1>
+                    <p class="hero-subtitle mb-4">
+                        Sistema de Transporte y Despachos. Plataforma integral de courier para orquestar de manera eficiente, ágil y transparente el abastecimiento desde la bodega principal hacia todas las sucursales y franquicias.
+                    </p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{% url 'courier:dashboard' %}" class="btn btn-primary-custom">
+                            <i class="fas fa-chart-line me-2"></i> Ver Dashboard
+                        </a>
+                        <a href="{% url 'courier:seguimiento' %}" class="btn btn-outline-custom">
+                            <i class="fas fa-map-marker-alt me-2"></i> Seguimiento en Vivo
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 mt-4 mt-lg-0">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="kpi-card">
+                                <div class="kpi-value">{{ kpis.envios_hoy }}</div>
+                                <div class="kpi-label">Envíos Hoy</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="kpi-card">
+                                <div class="kpi-value" style="color:var(--success);">{{ kpis.envios_entregados }}</div>
+                                <div class="kpi-label">Entregados</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="kpi-card">
+                                <div class="kpi-value" style="color:var(--info);">{{ kpis.envios_transito }}</div>
+                                <div class="kpi-label">En Tránsito</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="kpi-card">
+                                <div class="kpi-value" style="color:var(--warning);">{{ kpis.cumplimiento_sla }}%</div>
+                                <div class="kpi-label">Cumplimiento SLA</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Descripción del Sistema -->
+    <section style="padding:4rem 0;">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title"><span>Sistema de Transporte</span> y Despachos</h2>
+                <div class="section-divider mx-auto"></div>
+                <p style="color:var(--text-secondary);max-width:800px;margin:0 auto;">
+                    Music Pro implementará un sistema informático integral de transporte y despachos punto a punto, diseñado específicamente para orquestar de manera eficiente, ágil y transparente el abastecimiento desde la bodega principal hacia todas sus sucursales y franquicias.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-boxes-stacked"></i>
+                    <h5>Consolidación de Carga</h5>
+                    <p>Herramientas avanzadas de consolidación de carga y cubicaje automático, optimizando el espacio físico y el peso de los vehículos según la flota disponible.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-calendar-check"></i>
+                    <h5>Planificación Logística</h5>
+                    <p>Motor de planificación logística por calendario y ventanas horarias, permitiendo programar frecuencias de despacho fijas por días de la semana.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-satellite-dish"></i>
+                    <h5>Seguimiento GPS</h5>
+                    <p>Trazabilidad completa punto a punto mediante integración con GPS, trazado y optimización dinámica de rutas para evitar congestiones.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h5>Gestión de Incidencias</h5>
+                    <p>Panel de control para la gestión de incidencias en ruta, tales como retrasos, desvíos o contingencias mecánicas con registro de auditorías de custodia.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-qrcode"></i>
+                    <h5>Prueba de Entrega Digital</h5>
+                    <p>POD digital a través del escaneo de códigos QR, firma digital del receptor y captura fotográfica del estado de la mercadería recibida.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-bell"></i>
+                    <h5>Notificaciones Multicanal</h5>
+                    <p>Módulo automatizado de notificaciones por email, SMS y push para mantener informados a los encargados de sucursal sobre cada hito del trayecto.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-truck-arrow-right"></i>
+                    <h5>Logística Inversa</h5>
+                    <p>Módulo de logística inversa para gestionar garantías, reparaciones o transferencias entre tiendas.</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-pie"></i>
+                    <h5>Analítica Avanzada</h5>
+                    <p>Panel de analítica avanzada con indicadores clave de rendimiento (KPIs), métricas de cumplimiento de tiempos (SLA) y análisis de costos operativos.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Objetivos -->
+    <section style="padding:4rem 0;background:var(--dark);">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h2 class="section-title"><span>Objetivos</span> del Proyecto</h2>
+                    <div class="section-divider"></div>
+                    <ul style="list-style:none;padding:0;">
+                        <li class="mb-3" style="display:flex;align-items:flex-start;gap:12px;">
+                            <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(230,57,70,0.15);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:0.75rem;margin-top:2px;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <strong style="color:var(--text-primary);">Sistema Informático de Envíos</strong>
+                                <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Desarrollar un sistema informático que permita a Music Pro realizar envíos de manera eficiente y confiable.</p>
+                            </div>
+                        </li>
+                        <li class="mb-3" style="display:flex;align-items:flex-start;gap:12px;">
+                            <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(46,160,67,0.15);color:var(--success);display:flex;align-items:center;justify-content:center;font-size:0.75rem;margin-top:2px;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <strong style="color:var(--text-primary);">Seguimiento en Tiempo Real</strong>
+                                <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Implementar un sistema de seguimiento de paquetes en tiempo real para garantizar la transparencia del proceso de envío.</p>
+                            </div>
+                        </li>
+                        <li class="mb-3" style="display:flex;align-items:flex-start;gap:12px;">
+                            <div style="min-width:28px;height:28px;border-radius:50%;background:rgba(88,166,255,0.15);color:var(--info);display:flex;align-items:center;justify-content:center;font-size:0.75rem;margin-top:2px;">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div>
+                                <strong style="color:var(--text-primary);">Reducción de Tiempos de Entrega</strong>
+                                <p style="color:var(--text-secondary);margin:0;font-size:0.9rem;">Reducir el tiempo de entrega y mejorar la satisfacción del cliente al ofrecer un servicio de envío más rápido y confiable.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-lg-6 mt-4 mt-lg-0">
+                    <div class="card-dark">
+                        <div class="card-body p-4">
+                            <h5 style="font-weight:700;margin-bottom:1rem;">
+                                <i class="fas fa-info-circle me-2" style="color:var(--primary);"></i> Requerimientos del Sistema
+                            </h5>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span style="font-size:0.85rem;">Facilidad de uso</span>
+                                    <span style="font-size:0.85rem;color:var(--success);">98%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="bar bar-success" style="width:98%;"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span style="font-size:0.85rem;">Seguimiento en tiempo real</span>
+                                    <span style="font-size:0.85rem;color:var(--info);">95%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="bar bar-info" style="width:95%;"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span style="font-size:0.85rem;">Sistema de alertas</span>
+                                    <span style="font-size:0.85rem;color:var(--warning);">90%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="bar bar-warning" style="width:90%;"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span style="font-size:0.85rem;">Integración GPS</span>
+                                    <span style="font-size:0.85rem;color:var(--primary);">88%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="bar bar-primary" style="width:88%;"></div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span style="font-size:0.85rem;">Analítica y KPIs</span>
+                                    <span style="font-size:0.85rem;color:var(--accent);">85%</span>
+                                </div>
+                                <div class="progress-bar-custom">
+                                    <div class="bar bar-info" style="width:85%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Envíos Activos -->
+    <section style="padding:4rem 0;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h2 class="section-title"><span>Envíos</span> Activos</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <a href="{% url 'courier:envios' %}" class="btn btn-primary-custom">
+                    <i class="fas fa-plus me-2"></i> Nuevo Envío
+                </a>
+            </div>
+
+            {% for envio in envios %}
+            <div class="envio-card">
+                <div class="row align-items-center">
+                    <div class="col-lg-2 col-md-3 mb-2 mb-lg-0">
+                        <div style="font-weight:700;color:var(--text-primary);">{{ envio.numero_envio }}</div>
+                        <div style="font-size:0.8rem;color:var(--text-secondary);">Prioridad:
+                            <span class="badge-prioridad badge-{{ envio.prioridad }}">{{ envio.prioridad|title }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 mb-2 mb-lg-0">
+                        <div style="font-size:0.8rem;color:var(--text-secondary);">Origen</div>
+                        <div style="font-size:0.9rem;">{{ envio.sucursal_origen.ciudad }}</div>
+                    </div>
+                    <div class="col-lg-1 text-center d-none d-lg-block">
+                        <i class="fas fa-arrow-right" style="color:var(--primary);"></i>
+                    </div>
+                    <div class="col-lg-2 col-md-3 mb-2 mb-lg-0">
+                        <div style="font-size:0.8rem;color:var(--text-secondary);">Destino</div>
+                        <div style="font-size:0.9rem;">{{ envio.sucursal_destino.ciudad }}</div>
+                    </div>
+                    <div class="col-lg-2 col-md-3 mb-2 mb-lg-0">
+                        <div style="font-size:0.8rem;color:var(--text-secondary);">Estado</div>
+                        <span class="badge-estado badge-{{ envio.estado }}">{{ envio.get_estado_display }}</span>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span style="font-size:0.8rem;color:var(--text-secondary);">Progreso</span>
+                            <span style="font-size:0.8rem;color:var(--text-primary);">{{ envio.progreso }}%</span>
+                        </div>
+                        <div class="progress-bar-custom">
+                            <div class="bar {% if envio.progreso == 100 %}bar-success{% elif envio.progreso >= 60 %}bar-info{% elif envio.progreso >= 30 %}bar-warning{% else %}bar-primary{% endif %}" style="width:{{ envio.progreso }}%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="text-center mt-3">
+                <a href="{% url 'courier:envios' %}" class="btn btn-outline-custom">
+                    <i class="fas fa-eye me-2"></i> Ver Todos los Envíos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sucursales -->
+    <section style="padding:4rem 0;background:var(--dark);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title"><span>Sucursales</span> y Franquicias</h2>
+                <div class="section-divider mx-auto"></div>
+                <p style="color:var(--text-secondary);max-width:600px;margin:0 auto;">
+                    Red de distribución de Music Pro a lo largo de Chile
+                </p>
+            </div>
+            <div class="row g-4">
+                {% for sucursal in sucursales %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="sucursal-card">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="sucursal-icon">
+                                <i class="fas {% if forloop.first %}fa-warehouse{% elif forloop.counter == 2 %}fa-store{% elif forloop.counter == 3 %}fa-store{% else %}fa-shop{% endif %}"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:600;font-size:0.95rem;">{{ sucursal.nombre }}</div>
+                                <div style="font-size:0.8rem;color:var(--text-secondary);">{{ sucursal.ciudad }}</div>
+                            </div>
+                        </div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+                            <i class="fas fa-map-marker-alt me-2" style="width:16px;"></i> {{ sucursal.direccion }}
+                        </div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+                            <i class="fas fa-phone me-2" style="width:16px;"></i> {{ sucursal.telefono }}
+                        </div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.3rem;">
+                            <i class="fas fa-envelope me-2" style="width:16px;"></i> {{ sucursal.email }}
+                        </div>
+                        <div class="mt-2">
+                            {% if sucursal.activa %}
+                            <span style="color:var(--success);font-size:0.8rem;"><i class="fas fa-circle me-1" style="font-size:0.5rem;"></i> Activa</span>
+                            {% else %}
+                            <span style="color:var(--text-secondary);font-size:0.8rem;"><i class="fas fa-circle me-1" style="font-size:0.5rem;"></i> Inactiva</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Seguimiento en Tiempo Real -->
+    <section style="padding:4rem 0;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h2 class="section-title"><span>Seguimiento</span> en Tiempo Real</h2>
+                    <div class="section-divider"></div>
+
+                    <div class="card-dark mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 style="font-weight:700;margin:0;">
+                                    <i class="fas fa-route me-2" style="color:var(--primary);"></i> Ruta Activamente Monitoreada
+                                </h5>
+                                <span class="badge-estado badge-en_ruta"><i class="fas fa-circle me-1" style="font-size:0.5rem;"></i> En Vivo</span>
+                            </div>
+                            <div style="background:var(--darker);border-radius:10px;padding:2rem;text-align:center;border:1px dashed var(--card-border);">
+                                <i class="fas fa-map-marked-alt" style="font-size:4rem;color:var(--accent);opacity:0.5;"></i>
+                                <p style="color:var(--text-secondary);margin:1rem 0 0;">Mapa de seguimiento en tiempo real - Integración con GPS</p>
+                                <p style="color:var(--text-secondary);font-size:0.85rem;margin:0;">
+                                    <i class="fas fa-satellite-dish me-1"></i> 4 vehículos activos | Actualización cada 30 segundos
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <h5 style="font-weight:700;margin-bottom:1rem;">
+                        <i class="fas fa-history me-2" style="color:var(--primary);"></i> Últimos Eventos
+                    </h5>
+                    <div class="tracking-timeline">
+                        <div class="tracking-step completed">
+                            <div style="font-size:0.8rem;color:var(--success);font-weight:600;">08:00 - Despacho</div>
+                            <div style="font-size:0.85rem;">ENV-2026-0001 salió de bodega</div>
+                        </div>
+                        <div class="tracking-step completed">
+                            <div style="font-size:0.8rem;color:var(--success);font-weight:600;">10:30 - En Tránsito</div>
+                            <div style="font-size:0.85rem;">ENV-2026-0002 cruzó Ruta 5</div>
+                        </div>
+                        <div class="tracking-step active">
+                            <div style="font-size:0.8rem;color:var(--primary);font-weight:600;">14:30 - Incidencia</div>
+                            <div style="font-size:0.85rem;">Retraso en ENV-2026-0001</div>
+                        </div>
+                        <div class="tracking-step">
+                            <div style="font-size:0.8rem;color:var(--text-secondary);font-weight:600;">16:00 - Estimado</div>
+                            <div style="font-size:0.85rem;">Llegada ENV-2026-0002</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KPIs -->
+    <section style="padding:4rem 0;background:var(--dark);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title"><span>Indicadores</span> Clave de Rendimiento</h2>
+                <div class="section-divider mx-auto"></div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-shipping-fast mb-2" style="font-size:1.5rem;color:var(--primary);"></i>
+                        <div class="kpi-value">{{ kpis.paquetes_transportados }}</div>
+                        <div class="kpi-label">Paquetes Transportados</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-clock mb-2" style="font-size:1.5rem;color:var(--info);"></i>
+                        <div class="kpi-value" style="font-size:1.6rem;">{{ kpis.tiempo_promedio_entrega }}</div>
+                        <div class="kpi-label">Tiempo Promedio de Entrega</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-percentage mb-2" style="font-size:1.5rem;color:var(--success);"></i>
+                        <div class="kpi-value" style="color:var(--success);">{{ kpis.cumplimiento_sla }}%</div>
+                        <div class="kpi-label">Cumplimiento SLA</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-dollar-sign mb-2" style="font-size:1.5rem;color:var(--warning);"></i>
+                        <div class="kpi-value" style="font-size:1.5rem;color:var(--warning);">${{ kpis.costo_total_transporte|floatformat:0 }}</div>
+                        <div class="kpi-label">Costo Total Transporte</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Incidencias -->
+    <section style="padding:4rem 0;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h2 class="section-title"><span>Incidencias</span> Recientes</h2>
+                    <div class="section-divider"></div>
+                </div>
+                <a href="{% url 'courier:incidencias' %}" class="btn btn-outline-custom">
+                    <i class="fas fa-eye me-2"></i> Ver Todas
+                </a>
+            </div>
+            <div class="row g-3">
+                {% for incidencia in incidencias %}
+                <div class="col-lg-4">
+                    <div class="alert-custom {% if incidencia.tipo == 'retraso' %}alert-warning-custom{% elif incidencia.tipo == 'mecanica' %}alert-danger-custom{% else %}alert-info-custom{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <i class="fas {% if incidencia.tipo == 'retraso' %}fa-clock{% elif incidencia.tipo == 'mecanica' %}fa-wrench{% else %}fa-route{% endif %} me-2"></i>
+                                <strong>{{ incidencia.tipo|title }}</strong>
+                            </div>
+                            {% if incidencia.resuelta %}
+                            <span style="color:var(--success);font-size:0.75rem;"><i class="fas fa-check-circle me-1"></i> Resuelta</span>
+                            {% else %}
+                            <span style="font-size:0.75rem;"><i class="fas fa-exclamation-circle me-1"></i> Pendiente</span>
+                            {% endif %}
+                        </div>
+                        <div style="font-size:0.85rem;">{{ incidencia.descripcion }}</div>
+                        <div style="font-size:0.75rem;margin-top:0.5rem;opacity:0.7;">
+                            <i class="fas fa-calendar me-1"></i> {{ incidencia.fecha }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div style="width:40px;height:40px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                            <i class="fas fa-truck" style="color:white;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:700;">Music Pro Tour</div>
+                            <div style="font-size:0.8rem;color:var(--text-secondary);">Courier (Proveedor - Cliente)</div>
+                        </div>
+                    </div>
+                    <p style="color:var(--text-secondary);font-size:0.9rem;">
+                        Sistema informático integral de transporte y despachos para la gestión eficiente de envíos entre bodega principal, sucursales y franquicias.
+                    </p>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <h6 class="footer-title">Navegación</h6>
+                    <ul style="list-style:none;padding:0;">
+                        <li class="mb-2"><a href="{% url 'courier:index' %}" class="footer-link">Inicio</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:dashboard' %}" class="footer-link">Dashboard</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:seguimiento' %}" class="footer-link">Seguimiento</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:envios' %}" class="footer-link">Envíos</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <h6 class="footer-title">Gestión</h6>
+                    <ul style="list-style:none;padding:0;">
+                        <li class="mb-2"><a href="{% url 'courier:sucursales' %}" class="footer-link">Sucursales</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:paquetes' %}" class="footer-link">Paquetes</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:incidencias' %}" class="footer-link">Incidencias</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:notificaciones' %}" class="footer-link">Notificaciones</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <h6 class="footer-title">Reportes</h6>
+                    <ul style="list-style:none;padding:0;">
+                        <li class="mb-2"><a href="{% url 'courier:reportes' %}" class="footer-link">KPIs y Métricas</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:reportes' %}" class="footer-link">Costos Operativos</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:reportes' %}" class="footer-link">Cumplimiento SLA</a></li>
+                        <li class="mb-2"><a href="{% url 'courier:reportes' %}" class="footer-link">Análisis de Rutas</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <div>Music Pro Tour {{ ano }} - Courier (Proveedor - Cliente)</div>
+                    <div>Programación Backend - INACAP</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bars = document.querySelectorAll('.bar');
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.style.width = entry.target.style.width;
+                    }
+                });
+            }, { threshold: 0.5 });
+            bars.forEach(function(bar) { observer.observe(bar); });
+        });
+    </script>
+</body>
+</html>
