@@ -1,117 +1,64 @@
-<<<<<<< HEAD
-# Music Pro Tour - Courier Management System
+# Music Pro Tour - Courier (Proveedor - Cliente)
 
-Sistema de gestión de envíos y logística desarrollado con Django para controlar paquetes, sucursales, entregas, incidencias y seguimiento operativo.
+Sistema informático integral de transporte y despachos punto a punto para Music Pro Tour, desarrollado con Django y HTML/CSS/JavaScript.
 
 ## Descripción del proyecto
 
-Music Pro Tour es una aplicación web orientada a la gestión de courier/logística. Permite visualizar el estado de los paquetes, gestionar sucursales, registrar incidencias, supervisar entregas y analizar indicadores clave de rendimiento.
+Music Pro Tour implementa un sistema de courier para gestionar envíos desde la bodega principal hacia sucursales y franquicias, con seguimiento, incidencias, notificaciones, KPIs y reportes.
+
+## Funcionalidades principales
+
+- Dashboard con métricas y KPIs
+- Seguimiento en tiempo real de envíos
+- Gestión de envíos por estado
+- Gestión de paquetes
+- Registro y seguimiento de incidencias
+- Sucursales y red de distribución
+- Reportes y analítica
+- Notificaciones multicanal
 
 ## Tecnologías utilizadas
 
 - Python
 - Django
 - SQLite
-- Bootstrap
-- HTML / CSS / JavaScript
-
-## Funcionalidades principales
-
-- Dashboard con KPIs
-- Gestión de envíos
-- Seguimiento de paquetes
-- Registro de sucursales
-- Control de incidencias
-- Visualización de estados y prioridades
-- Interfaz responsiva
+- Bootstrap 5
+- HTML5 / CSS3 / JavaScript
+- Chart.js
+- Font Awesome
 
 ## Requisitos
 
-- Python 3.10 o superior
-- Django 5.x o superior
-- pip
+- Python 3.x
+- Django 4.x o superior
+- SQLite
 
 ## Instalación
 
-1. Clona el repositorio:
-
 ```bash
 git clone https://github.com/maxsteel19/musicpro-courier.git
-```
-
-2. Ingresa a la carpeta del proyecto:
-
-```bash
 cd musicpro-courier
-```
-
-3. Crea un entorno virtual:
-
-```bash
 python -m venv venv
-```
-
-4. Activa el entorno virtual:
-
-- Windows:
-
-```bash
 venv\Scripts\activate
-```
-
-- Linux/macOS:
-
-```bash
-source venv/bin/activate
-```
-
-5. Instala dependencias:
-
-```bash
-pip install -r requirements.txt
-```
-
-6. Ejecuta migraciones:
-
-```bash
+pip install django
 python manage.py migrate
-```
-
-7. Inicia el servidor:
-
-```bash
 python manage.py runserver
 ```
 
-8. Abre la app en el navegador:
+Accede en el navegador a:
 
 ```text
-http://localhost:8000/
+http://127.0.0.1:8000/
 ```
-
-## Uso
-
-La aplicación incluye:
-
-- Dashboard general
-- Vista de envíos
-- Visualización de paquetes
-- Administración de sucursales
-- Registro de incidencias
-- Reportes y métricas
 
 ## Estado del proyecto
 
-Proyecto funcional con estructura Django implementada, conectada a la base de datos y con datos de ejemplo para demostración.
+Prototipo funcional de la Fase 3 del sistema Courier para Music Pro Tour, integrado con Django y datos mock.
 
 ## Autor
 
-Proyecto desarrollado para evaluación académica / entregable de programación backend.
+Pablo Martínez
 
-## Licencia
+## Nota
 
-Uso académico.
-=======
-# musicpro-courier
-Sistema de courier punto a punto para Music Pro Tour, desarrollado con Django (INACAP - Programación Backend)
->>>>>>> ea04b0394091b438a96734deb1ad498953339b19
+Este proyecto mantiene el enfoque de Courier (Proveedor - Cliente) indicado en la corrección del informe, sin cambiarlo por un sistema de pago.
