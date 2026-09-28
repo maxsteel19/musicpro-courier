@@ -51,6 +51,16 @@ Accede en el navegador a:
 http://127.0.0.1:8000/
 ```
 
+## Administrador y seguridad
+
+El administrador de Django permite crear, consultar, editar y eliminar sucursales, paquetes, envíos, incidencias y notificaciones. Crea una cuenta administrativa con:
+
+```bash
+python manage.py createsuperuser
+```
+
+Luego ingresa en `http://127.0.0.1:8000/admin/`. Para producción, configura `DJANGO_DEBUG=False`, `DJANGO_SECRET_KEY` con una clave secreta propia y `DJANGO_ALLOWED_HOSTS` con los dominios autorizados. La aplicación rechaza iniciar en modo producción si falta la clave.
+
 ## Estado del proyecto
 
 Prototipo funcional de la Fase 3 del sistema Courier para Music Pro Tour, integrado con Django y datos mock.
