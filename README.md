@@ -1,32 +1,30 @@
 # Evaluación 2 - Aplicación web con Django Admin
 
-## Descripción
+## 1. Descripción general
 
-Este proyecto fue desarrollado como parte de la Evaluación 2, donde se construye una aplicación web con Django, configurando la base de datos, gestionando su estructura mediante migraciones, representando el modelo de datos y usando Django Admin para administrar la información.
+Este proyecto corresponde a la Evaluación 2, en la cual se desarrolla una aplicación web con Django, configurando una base de datos, gestionando su estructura mediante migraciones, modelando entidades y administrándolas desde Django Admin.
 
-La aplicación corresponde a un sistema de gestión logística para Music Pro Tour, enfocado en sucursales, paquetes, envíos, incidencias y notificaciones.
+La solución implementada busca resolver la gestión de operaciones logísticas y de distribución para Music Pro Tour, centrada en sucursales, paquetes, envíos, incidencias y notificaciones.
 
-## Objetivo general
+## 2. Objetivo
 
-Desarrollar una aplicación web con Django que permita:
+Desarrollar una aplicación backend con Django que permita:
 
-- configurar la conexión a una base de datos,
-- modelar correctamente las entidades y relaciones,
-- generar migraciones y aplicarlas,
-- administrar registros desde Django Admin,
-- realizar operaciones CRUD,
+- configurar la conexión a la base de datos,
+- modelar correctamente las entidades y sus relaciones,
+- generar y aplicar migraciones,
+- administrar registros desde el panel de Django Admin,
+- implementar operaciones CRUD,
 - aplicar filtros y búsquedas,
-- cargar datos de prueba con Faker.
+- cargar datos de prueba para validar el sistema.
 
-## Requisitos evaluados
+## 3. Requisitos evaluados
 
-### 1. Configuración de la base de datos
-- La aplicación está conectada a SQLite mediante Django.
-- La configuración se encuentra en `musicpro/settings.py`.
-- La base de datos utilizada es SQLite (`db.sqlite3`).
+### 3.1 Configuración de la base de datos
+La aplicación utiliza SQLite como motor de base de datos y está conectada mediante la configuración de Django en `musicpro/settings.py`.
 
-### 2. Modelamiento de datos
-Se definieron los modelos principales:
+### 3.2 Modelamiento de datos
+Se implementaron modelos para representar la información principal del sistema:
 
 - `Sucursal`
 - `Paquete`
@@ -34,41 +32,98 @@ Se definieron los modelos principales:
 - `Incidencia`
 - `Notificacion`
 
-Cada modelo contiene atributos relevantes, tipos de datos y relaciones entre entidades.
+Cada uno cuenta con atributos, tipos de datos y relaciones que permiten mantener la integridad de la información.
 
-### 3. Diagrama de base de datos
-El proyecto incluye un diagrama de base de datos que representa las tablas, sus atributos y relaciones de manera visual.
+### 3.3 Migraciones
+Las migraciones se gestionan con Django y se encuentran en la carpeta `courier/migrations`. Esto permite llevar el historial de cambios de la estructura de la base de datos.
 
-### 4. Migraciones
-- Las migraciones se generan con Django.
-- El historial se mantiene en la carpeta `courier/migrations`.
-- Se aplican con `python manage.py migrate`.
+### 3.4 Django Admin
+Se registraron los modelos en `courier/admin.py`, permitiendo:
 
-### 5. Django Admin
-El administrador se configura en `courier/admin.py` y permite:
-
-- ver registros,
-- crear nuevos datos,
-- editar información,
+- crear registros,
+- consultar información,
+- editar datos,
 - eliminar registros,
-- aplicar filtros,
-- buscar por texto,
-- personalizar la vista de administración.
+- filtrar por estado y otros criterios,
+- realizar búsquedas rápidas.
 
-### 6. CRUD
-La aplicación permite realizar operaciones básicas sobre los modelos:
+### 3.5 CRUD
+La aplicación permite realizar operaciones básicas de creación, lectura, actualización y eliminación sobre los datos del sistema.
 
-- Crear
-- Leer
-- Actualizar
-- Eliminar
+### 3.6 Generación de datos de prueba
+Se incorporó una carga de datos ficticios con Faker para validar la aplicación con registros realistas.
 
-Esto se valida principalmente desde el panel administrativo de Django y desde las vistas del proyecto.
+## 4. Diagrama de base de datos
 
-### 7. Generación de datos de prueba
-Se incorporó una carga de datos ficticios usando Faker para probar la aplicación con información realista.
+```mermaid
+erDiagram
+    SUCURSAL ||--o{ ENVIO : origen
+    SUCURSAL ||--o{ ENVIO : destino
+    PAQUETE ||--o{ ENVIO : incluye
+    ENVIO ||--o{ INCIDENCIA : registra
+    ENVIO ||--o{ NOTIFICACION : genera
 
-## Estructura del proyecto
+    SUCURSAL {
+        int id PK
+        string nombre
+        string direccion
+        string ciudad
+        string telefono
+        string email
+        float latitud
+        float longitud
+        boolean activa
+    }
+
+    PAQUETE {
+        int id PK
+        string codigo UK
+        string descripcion
+        decimal peso
+        decimal volumen
+        decimal valor_declarado
+        string estado
+        datetime fecha_creacion
+        datetime fecha_actualizacion
+    }
+
+    ENVIO {
+        int id PK
+        string numero_envio UK
+        int sucursal_origen_id FK
+        int sucursal_destino_id FK
+        int paquete_id FK
+        string estado
+        string prioridad
+        string conductor
+        string patente_vehiculo
+        int progreso
+        datetime fecha_despacho
+        datetime fecha_entrega_estimada
+        datetime fecha_entrega_real
+        text observaciones
+    }
+
+    INCIDENCIA {
+        int id PK
+        int envio_id FK
+        string tipo
+        text descripcion
+        datetime fecha
+        boolean resuelta
+    }
+
+    NOTIFICACION {
+        int id PK
+        int envio_id FK
+        string canal
+        text mensaje
+        datetime fecha_envio
+        boolean enviada
+    }
+```
+
+## 5. Estructura del proyecto
 
 ```text
 musicpro/
@@ -94,34 +149,36 @@ static/
 
 manage.py
 README.md
+db.sqlite3
 ```
 
-## Tecnologías utilizadas
+## 6. Tecnologías utilizadas
 
 - Python
 - Django
 - SQLite
-- HTML/CSS
+- HTML
+- CSS
 - JavaScript
 - Bootstrap
 - Faker
 
-## Instalación
+## 7. Instalación y ejecución
 
-1. Clonar el repositorio:
+### 7.1 Clonar el proyecto
 
 ```bash
 git clone https://github.com/maxsteel19/musicpro-courier.git
 cd musicpro-courier
 ```
 
-2. Crear entorno virtual:
+### 7.2 Crear entorno virtual
 
 ```bash
 python -m venv env
 ```
 
-3. Activar entorno virtual:
+### 7.3 Activar entorno virtual
 
 Windows:
 
@@ -129,78 +186,78 @@ Windows:
 env\Scripts\activate
 ```
 
-4. Instalar dependencias:
+### 7.4 Instalar dependencias
 
 ```bash
 pip install django faker
 ```
 
-5. Ejecutar migraciones:
+### 7.5 Ejecutar migraciones
 
 ```bash
 python manage.py migrate
 ```
 
-6. Ejecutar servidor:
+### 7.6 Iniciar el servidor
 
 ```bash
 python manage.py runserver
 ```
 
-7. Acceder a la aplicación:
+### 7.7 Acceder a la aplicación
 
 ```text
 http://127.0.0.1:8000/
 ```
 
-## Administrador de Django
+## 8. Administración del sistema
 
-Para acceder al panel administrativo:
+Se puede crear un usuario administrador con:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Luego entrar a:
+Posteriormente se accede a:
 
 ```text
 http://127.0.0.1:8000/admin/
 ```
 
-## Datos de prueba
+## 9. Datos de prueba
 
-Se puede cargar información inicial con:
+Para cargar información inicial del sistema se utiliza:
 
 ```bash
 python manage.py seed_courier
 ```
 
-También se puede generar datos con Faker para probar la carga masiva y validar la persistencia de datos.
+Esto genera registros de prueba para validar el funcionamiento de la aplicación con datos realistas.
 
-## Verificación
+## 10. Verificación
 
-Se ejecutan pruebas para comprobar funcionamiento del proyecto y del administrador:
+Para comprobar que el proyecto funciona correctamente:
 
 ```bash
 python manage.py test
 ```
 
-## Estado del proyecto
+## 11. Resultado esperado
 
-El proyecto cumple con los aspectos principales de la evaluación:
+La aplicación cumple con los principales objetivos de la evaluación:
 
 - conexión a base de datos,
-- modelado de datos,
-- migraciones,
-- Django Admin,
-- CRUD,
+- modelos bien definidos,
+- migraciones generadas y aplicadas,
+- administración mediante Django Admin,
+- CRUD funcional,
 - filtros y búsquedas,
-- generación de datos ficticios para pruebas.
+- carga de datos de prueba.
 
-## Autor
+## 12. Autor
 
 Pablo Martínez
 
-## Nota
+## 13. Nota final
 
-Este README fue redactado con enfoque exclusivo en la Evaluación 2: Aplicación web con Django Admin.
+Este README está orientado exclusivamente a la Evaluación 2: Aplicación web con Django Admin.
