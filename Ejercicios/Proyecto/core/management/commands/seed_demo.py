@@ -8,10 +8,15 @@ class Command(BaseCommand):
     help = 'Genera datos ficticios para probar la aplicación Django Admin.'
 
     def handle(self, *args, **options):
+        DetallePedido.objects.all().delete()
+        Pedido.objects.all().delete()
+        Producto.objects.all().delete()
+        Cliente.objects.all().delete()
+
         fake = Faker('es_ES')
 
         clientes = []
-        for _ in range(10):
+        for _ in range(100):
             cliente = Cliente.objects.create(
                 nombre=fake.first_name(),
                 apellido=fake.last_name(),
@@ -23,10 +28,10 @@ class Command(BaseCommand):
             clientes.append(cliente)
 
         productos = []
-        for i in range(15):
+        for i in range(100):
             producto = Producto.objects.create(
                 codigo=f'PROD-{i + 1:03d}',
-                nombre=fake.word().capitalize() + ' ' + fake.word().capitalize(),
+                nombre=' '.join(fake.words(nb=2)).title(),
                 categoria=fake.random_element(elements=['Tecnología', 'Hogar', 'Deportes', 'Música', 'Oficina']),
                 precio=fake.random_int(1000, 500000),
                 stock=fake.random_int(5, 200),
@@ -34,7 +39,7 @@ class Command(BaseCommand):
             )
             productos.append(producto)
 
-        for _ in range(25):
+        for _ in range(100):
             pedido = Pedido.objects.create(
                 cliente=fake.random_element(clientes),
                 estado=fake.random_element(elements=['pendiente', 'procesado', 'enviado', 'entregado', 'cancelado']),
@@ -53,4 +58,9 @@ class Command(BaseCommand):
 
             pedido.guardar_total()
 
-        self.stdout.write(self.style.SUCCESS('Datos ficticios generados correctamente.'))
+        self.stdout.write(
+            self.style.SUCCESS(
+                'Datos ficticios generados correctamente: 100 clientes, '
+                '100 productos y 100 pedidos.'
+            )
+        )
