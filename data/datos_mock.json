@@ -1,0 +1,301 @@
+{
+    "sucursales": [
+        {
+            "id": 1,
+            "nombre": "Music Pro - Sede Principal",
+            "direccion": "Av. Providencia 1234, Santiago",
+            "ciudad": "Santiago",
+            "telefono": "+56 2 2345 6789",
+            "email": "sede@musicpro.cl",
+            "latitud": -33.4489,
+            "longitud": -70.6422,
+            "activa": true
+        },
+        {
+            "id": 2,
+            "nombre": "Music Pro - Sucursal Concepción",
+            "direccion": "Calle Freire 456, Concepción",
+            "ciudad": "Concepción",
+            "telefono": "+56 41 234 5678",
+            "email": "concepcion@musicpro.cl",
+            "latitud": -36.8201,
+            "longitud": -73.0444,
+            "activa": true
+        },
+        {
+            "id": 3,
+            "nombre": "Music Pro - Sucursal Valparaíso",
+            "direccion": "Av. Pedro Montt 789, Valparaíso",
+            "ciudad": "Valparaíso",
+            "telefono": "+56 32 234 5678",
+            "email": "valparaiso@musicpro.cl",
+            "latitud": -33.0472,
+            "longitud": -71.6127,
+            "activa": true
+        },
+        {
+            "id": 4,
+            "nombre": "Music Pro - Franquicia Temuco",
+            "direccion": "Calle Arturo Prat 321, Temuco",
+            "ciudad": "Temuco",
+            "telefono": "+56 45 234 5678",
+            "email": "temuco@musicpro.cl",
+            "latitud": -38.7359,
+            "longitud": -72.5904,
+            "activa": true
+        },
+        {
+            "id": 5,
+            "nombre": "Music Pro - Franquicia Antofagasta",
+            "direccion": "Av. Angamos 654, Antofagasta",
+            "ciudad": "Antofagasta",
+            "telefono": "+56 55 234 5678",
+            "email": "antofagasta@musicpro.cl",
+            "latitud": -23.6509,
+            "longitud": -70.3975,
+            "activa": true
+        }
+    ],
+    "paquetes": [
+        {
+            "id": 1,
+            "codigo": "PKG-2026-0001",
+            "descripcion": "Guitarra Eléctrica Fender Stratocaster",
+            "peso": 5.5,
+            "volumen": 0.08,
+            "valor_declarado": 890000,
+            "estado": "preparacion",
+            "fecha_creacion": "2026-09-01"
+        },
+        {
+            "id": 2,
+            "codigo": "PKG-2026-0002",
+            "descripcion": "Batería Electrónica Roland TD-17",
+            "peso": 25.0,
+            "volumen": 0.45,
+            "valor_declarado": 1250000,
+            "estado": "transito",
+            "fecha_creacion": "2026-09-02"
+        },
+        {
+            "id": 3,
+            "codigo": "PKG-2026-0003",
+            "descripcion": "Amplificador Marshall JCM 800",
+            "peso": 30.0,
+            "volumen": 0.55,
+            "valor_declarado": 750000,
+            "estado": "entregado",
+            "fecha_creacion": "2026-09-01"
+        },
+        {
+            "id": 4,
+            "codigo": "PKG-2026-0004",
+            "descripcion": "Teclado Yamaha PSR-SX900",
+            "peso": 12.0,
+            "volumen": 0.30,
+            "valor_declarado": 680000,
+            "estado": "despachado",
+            "fecha_creacion": "2026-09-03"
+        },
+        {
+            "id": 5,
+            "codigo": "PKG-2026-0005",
+            "descripcion": "Micrófono Shure SM58 (x6)",
+            "peso": 3.5,
+            "volumen": 0.05,
+            "valor_declarado": 420000,
+            "estado": "preparacion",
+            "fecha_creacion": "2026-09-04"
+        },
+        {
+            "id": 6,
+            "codigo": "PKG-2026-0006",
+            "descripcion": "Mesa de Mezclas Behringer X32",
+            "peso": 15.0,
+            "volumen": 0.35,
+            "valor_declarado": 950000,
+            "estado": "transito",
+            "fecha_creacion": "2026-09-02"
+        },
+        {
+            "id": 7,
+            "codigo": "PKG-2026-0007",
+            "descripcion": "Cable XLR 10m (x20)",
+            "peso": 8.0,
+            "volumen": 0.15,
+            "valor_declarado": 180000,
+            "estado": "entregado",
+            "fecha_creacion": "2026-09-01"
+        },
+        {
+            "id": 8,
+            "codigo": "PKG-2026-0008",
+            "descripcion": "Par de Bafles JBL EON 615",
+            "peso": 45.0,
+            "volumen": 0.90,
+            "valor_declarado": 1650000,
+            "estado": "despachado",
+            "fecha_creacion": "2026-09-04"
+        }
+    ],
+    "envios": [
+        {
+            "id": 1,
+            "numero_envio": "ENV-2026-0001",
+            "sucursal_origen_id": 1,
+            "sucursal_destino_id": 2,
+            "paquete_id": 2,
+            "estado": "en_ruta",
+            "prioridad": "alta",
+            "conductor": "Carlos Muñoz",
+            "patente_vehiculo": "AB-1234",
+            "fecha_despacho": "2026-09-05 08:00",
+            "fecha_entrega_estimada": "2026-09-06 14:00",
+            "progreso": 65
+        },
+        {
+            "id": 2,
+            "numero_envio": "ENV-2026-0002",
+            "sucursal_origen_id": 1,
+            "sucursal_destino_id": 3,
+            "paquete_id": 4,
+            "estado": "en_ruta",
+            "prioridad": "media",
+            "conductor": "María González",
+            "patente_vehiculo": "CD-5678",
+            "fecha_despacho": "2026-09-05 10:30",
+            "fecha_entrega_estimada": "2026-09-06 16:00",
+            "progreso": 40
+        },
+        {
+            "id": 3,
+            "numero_envio": "ENV-2026-0003",
+            "sucursal_origen_id": 1,
+            "sucursal_destino_id": 4,
+            "paquete_id": 6,
+            "estado": "en_ruta",
+            "prioridad": "urgente",
+            "conductor": "Pedro Soto",
+            "patente_vehiculo": "EF-9012",
+            "fecha_despacho": "2026-09-05 06:00",
+            "fecha_entrega_estimada": "2026-09-06 12:00",
+            "progreso": 80
+        },
+        {
+            "id": 4,
+            "numero_envio": "ENV-2026-0004",
+            "sucursal_origen_id": 1,
+            "sucursal_destino_id": 5,
+            "paquete_id": 8,
+            "estado": "en_ruta",
+            "prioridad": "alta",
+            "conductor": "Ana Reyes",
+            "patente_vehiculo": "GH-3456",
+            "fecha_despacho": "2026-09-05 07:30",
+            "fecha_entrega_estimada": "2026-09-07 10:00",
+            "progreso": 25
+        },
+        {
+            "id": 5,
+            "numero_envio": "ENV-2026-0005",
+            "sucursal_origen_id": 1,
+            "sucursal_destino_id": 2,
+            "paquete_id": 3,
+            "estado": "entregado",
+            "prioridad": "media",
+            "conductor": "Luis Fernández",
+            "patente_vehiculo": "IJ-7890",
+            "fecha_despacho": "2026-09-03 09:00",
+            "fecha_entrega_estimada": "2026-09-04 15:00",
+            "fecha_entrega_real": "2026-09-04 14:30",
+            "progreso": 100
+        },
+        {
+            "id": 6,
+            "numero_envio": "ENV-2026-0006",
+            "sucursal_origen_id": 1,
+            "sucursal_destino_id": 3,
+            "paquete_id": 7,
+            "estado": "entregado",
+            "prioridad": "baja",
+            "conductor": "Roberto Díaz",
+            "patente_vehiculo": "KL-1357",
+            "fecha_despacho": "2026-09-02 11:00",
+            "fecha_entrega_estimada": "2026-09-03 17:00",
+            "fecha_entrega_real": "2026-09-03 16:45",
+            "progreso": 100
+        }
+    ],
+    "incidencias": [
+        {
+            "id": 1,
+            "envio_id": 1,
+            "tipo": "retraso",
+            "descripcion": "Retraso por congestión en Ruta 5 Sur",
+            "fecha": "2026-09-05 14:30",
+            "resuelta": false
+        },
+        {
+            "id": 2,
+            "envio_id": 3,
+            "tipo": "mecanica",
+            "descripcion": "Cambio de neumático por pinchazo",
+            "fecha": "2026-09-05 10:15",
+            "resuelta": true
+        },
+        {
+            "id": 3,
+            "envio_id": 2,
+            "tipo": "desvio",
+            "descripcion": "Desvío por corte de ruta por manifestación",
+            "fecha": "2026-09-05 13:00",
+            "resuelta": false
+        }
+    ],
+    "kpis": {
+        "envios_hoy": 4,
+        "envios_entregados": 2,
+        "envios_transito": 4,
+        "envios_pendientes": 0,
+        "tiempo_promedio_entrega": "26.5 horas",
+        "cumplimiento_sla": 92.5,
+        "costo_total_transporte": 1850000,
+        "paquetes_transportados": 8,
+        "sucursales_activas": 5,
+        "incidencias_abiertas": 2
+    },
+    "notificaciones": [
+        {
+            "id": 1,
+            "envio": "ENV-2026-0001",
+            "canal": "email",
+            "mensaje": "Su paquete sale de bodega principal",
+            "fecha": "2026-09-05 08:00",
+            "enviada": true
+        },
+        {
+            "id": 2,
+            "envio": "ENV-2026-0001",
+            "canal": "sms",
+            "mensaje": "Paquete en tránsito por Ruta 5 Sur",
+            "fecha": "2026-09-05 12:00",
+            "enviada": true
+        },
+        {
+            "id": 3,
+            "envio": "ENV-2026-0003",
+            "canal": "push",
+            "mensaje": "Alerta: retraso mecánico en envío urgente",
+            "fecha": "2026-09-05 10:15",
+            "enviada": true
+        },
+        {
+            "id": 4,
+            "envio": "ENV-2026-0004",
+            "canal": "email",
+            "mensaje": "Envío programado para mañana",
+            "fecha": "2026-09-05 18:00",
+            "enviada": false
+        }
+    ]
+}

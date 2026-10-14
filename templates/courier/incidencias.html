@@ -1,0 +1,129 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ empresa }} - {{ titulo }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root{--primary:#e63946;--primary-dark:#c1121f;--secondary:#1d3557;--accent:#457b9d;--dark:#0d1117;--darker:#010409;--card-bg:#161b22;--card-border:#30363d;--text-primary:#f0f6fc;--text-secondary:#8b949e;--success:#2ea043;--warning:#d29922;--info:#58a6ff;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--darker);color:var(--text-primary);}
+        .navbar-custom{background:linear-gradient(135deg,var(--dark) 0%,var(--secondary) 100%);border-bottom:2px solid var(--primary);padding:0.5rem 0;}
+        .navbar-custom .navbar-brand{color:var(--text-primary);font-weight:700;font-size:1.2rem;}
+        .navbar-custom .nav-link{color:var(--text-secondary);font-weight:500;padding:0.5rem 1rem;transition:all 0.3s;border-radius:6px;}
+        .navbar-custom .nav-link:hover,.navbar-custom .nav-link.active{color:var(--text-primary);background:rgba(230,57,70,0.15);}
+        .section-title{font-size:1.8rem;font-weight:700;margin-bottom:0.5rem;}
+        .section-title span{color:var(--primary);}
+        .section-divider{width:60px;height:3px;background:var(--primary);border-radius:2px;margin-bottom:2rem;}
+        .card-dark{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;transition:all 0.3s;}
+        .card-dark:hover{border-color:var(--primary);}
+        .card-dark .card-body{padding:1.5rem;}
+        .alert-custom{border-radius:10px;padding:1rem 1.25rem;border:1px solid;}
+        .alert-warning-custom{background:rgba(210,153,34,0.1);border-color:rgba(210,153,34,0.3);color:var(--warning);}
+        .alert-danger-custom{background:rgba(230,57,70,0.1);border-color:rgba(230,57,70,0.3);color:var(--primary);}
+        .alert-info-custom{background:rgba(88,166,255,0.1);border-color:rgba(88,166,255,0.3);color:var(--info);}
+        .btn-primary-custom{background:var(--primary);border:none;color:white;padding:0.5rem 1.25rem;border-radius:8px;font-weight:600;}
+        .btn-primary-custom:hover{background:var(--primary-dark);color:white;}
+        .btn-outline-custom{background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);padding:0.5rem 1.25rem;border-radius:8px;font-weight:500;}
+        .btn-outline-custom:hover{border-color:var(--primary);color:var(--primary);}
+        .footer{background:var(--dark);border-top:1px solid var(--card-border);padding:2rem 0;margin-top:4rem;}
+        .footer-bottom{border-top:1px solid var(--card-border);padding-top:1.5rem;margin-top:2rem;color:var(--text-secondary);font-size:0.85rem;}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'courier:index' %}">
+                <div style="width:40px;height:40px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;"><i class="fas fa-truck" style="color:white;"></i></div>
+                <div><div style="font-size:1.05rem;line-height:1.2;">Music Pro Tour</div><div style="font-size:0.7rem;color:var(--text-secondary);font-weight:400;">Incidencias</div></div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><i class="fas fa-bars" style="color:var(--text-primary);"></i></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:index' %}"><i class="fas fa-home me-1"></i> Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:dashboard' %}"><i class="fas fa-chart-line me-1"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:seguimiento' %}"><i class="fas fa-map-marker-alt me-1"></i> Seguimiento</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:envios' %}"><i class="fas fa-box me-1"></i> Envíos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:sucursales' %}"><i class="fas fa-store me-1"></i> Sucursales</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:reportes' %}"><i class="fas fa-chart-bar me-1"></i> Reportes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section style="padding:2rem 0;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h1 class="section-title"><span>Incidencias</span> en Ruta</h1>
+                    <div class="section-divider"></div>
+                </div>
+                <button class="btn btn-primary-custom"><i class="fas fa-plus me-2"></i> Registrar Incidencia</button>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card-dark"><div class="card-body text-center">
+                        <div style="font-size:2rem;font-weight:800;color:var(--warning);">1</div>
+                        <div style="color:var(--text-secondary);font-size:0.85rem;">Retrasos</div>
+                    </div></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-dark"><div class="card-body text-center">
+                        <div style="font-size:2rem;font-weight:800;color:var(--primary);">1</div>
+                        <div style="color:var(--text-secondary);font-size:0.85rem;">Contingencias Mecánicas</div>
+                    </div></div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card-dark"><div class="card-body text-center">
+                        <div style="font-size:2rem;font-weight:800;color:var(--info);">1</div>
+                        <div style="color:var(--text-secondary);font-size:0.85rem;">Desvíos</div>
+                    </div></div>
+                </div>
+            </div>
+
+            <h4 style="font-weight:700;margin-bottom:1rem;">Registro de Incidencias</h4>
+
+            {% for incidencia in incidencias %}
+            <div class="card-dark mb-3">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div style="width:48px;height:48px;border-radius:12px;background:{% if incidencia.tipo == 'retraso' %}rgba(210,153,34,0.15){% elif incidencia.tipo == 'mecanica' %}rgba(230,57,70,0.15){% else %}rgba(88,166,255,0.15){% endif %};display:flex;align-items:center;justify-content:center;">
+                                <i class="fas {% if incidencia.tipo == 'retraso' %}fa-clock{% elif incidencia.tipo == 'mecanica' %}fa-wrench{% else %}fa-route{% endif %}" style="font-size:1.2rem;color:{% if incidencia.tipo == 'retraso' %}var(--warning){% elif incidencia.tipo == 'mecanica' %}var(--primary){% else %}var(--info){% endif %};"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:700;font-size:1.05rem;">{{ incidencia.tipo|title }}</div>
+                                <div style="font-size:0.85rem;color:var(--text-secondary);">Envío: ENV-2026-000{{ incidencia.envio_id }} | {{ incidencia.fecha }}</div>
+                            </div>
+                        </div>
+                        {% if incidencia.resuelta %}
+                        <span style="color:var(--success);font-size:0.85rem;"><i class="fas fa-check-circle me-1"></i> Resuelta</span>
+                        {% else %}
+                        <span class="alert-custom alert-danger-custom" style="padding:0.3rem 0.8rem;font-size:0.8rem;"><i class="fas fa-exclamation-circle me-1"></i> Pendiente</span>
+                        {% endif %}
+                    </div>
+                    <p style="color:var(--text-secondary);margin:0;">{{ incidencia.descripcion }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <div>Music Pro Tour 2026 - Gestión de Incidencias</div>
+                    <div>Programación Backend - INACAP</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,254 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ empresa }} - {{ titulo }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root{--primary:#e63946;--primary-dark:#c1121f;--secondary:#1d3557;--accent:#457b9d;--dark:#0d1117;--darker:#010409;--card-bg:#161b22;--card-border:#30363d;--text-primary:#f0f6fc;--text-secondary:#8b949e;--success:#2ea043;--warning:#d29922;--info:#58a6ff;}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--darker);color:var(--text-primary);}
+        .navbar-custom{background:linear-gradient(135deg,var(--dark) 0%,var(--secondary) 100%);border-bottom:2px solid var(--primary);padding:0.5rem 0;}
+        .navbar-custom .navbar-brand{color:var(--text-primary);font-weight:700;font-size:1.2rem;}
+        .navbar-custom .nav-link{color:var(--text-secondary);font-weight:500;padding:0.5rem 1rem;transition:all 0.3s;border-radius:6px;}
+        .navbar-custom .nav-link:hover,.navbar-custom .nav-link.active{color:var(--text-primary);background:rgba(230,57,70,0.15);}
+        .section-title{font-size:1.8rem;font-weight:700;margin-bottom:0.5rem;}
+        .section-title span{color:var(--primary);}
+        .section-divider{width:60px;height:3px;background:var(--primary);border-radius:2px;margin-bottom:2rem;}
+        .card-dark{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;}
+        .card-dark .card-body{padding:1.5rem;}
+        .kpi-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;padding:1.5rem;text-align:center;}
+        .kpi-card:hover{border-color:var(--primary);transform:translateY(-2px);}
+        .kpi-value{font-size:2.2rem;font-weight:800;color:var(--primary);line-height:1;}
+        .kpi-label{color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem;}
+        .progress-bar-custom{height:8px;background:var(--card-border);border-radius:4px;overflow:hidden;}
+        .progress-bar-custom .bar{height:100%;border-radius:4px;}
+        .bar-primary{background:var(--primary);}
+        .bar-success{background:var(--success);}
+        .bar-warning{background:var(--warning);}
+        .bar-info{background:var(--info);}
+        .table-dark-custom{background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;overflow:hidden;}
+        .table-dark-custom thead th{background:rgba(255,255,255,0.05);border-bottom:1px solid var(--card-border);color:var(--text-secondary);font-weight:600;font-size:0.85rem;padding:0.85rem 1rem;}
+        .table-dark-custom tbody td{border-bottom:1px solid var(--card-border);color:var(--text-primary);font-size:0.9rem;padding:0.85rem 1rem;vertical-align:middle;}
+        .table-dark-custom tbody tr:last-child td{border-bottom:none;}
+        .btn-primary-custom{background:var(--primary);border:none;color:white;padding:0.5rem 1.25rem;border-radius:8px;font-weight:600;}
+        .btn-primary-custom:hover{background:var(--primary-dark);color:white;}
+        .btn-outline-custom{background:transparent;border:1px solid var(--card-border);color:var(--text-secondary);padding:0.5rem 1.25rem;border-radius:8px;font-weight:500;}
+        .btn-outline-custom:hover{border-color:var(--primary);color:var(--primary);}
+        .footer{background:var(--dark);border-top:1px solid var(--card-border);padding:2rem 0;margin-top:4rem;}
+        .footer-bottom{border-top:1px solid var(--card-border);padding-top:1.5rem;margin-top:2rem;color:var(--text-secondary);font-size:0.85rem;}
+        .badge-estado{padding:0.35rem 0.75rem;border-radius:20px;font-size:0.75rem;font-weight:600;}
+        .badge-preparacion{background:rgba(210,153,34,0.2);color:var(--warning);}
+        .badge-despachado{background:rgba(88,166,255,0.2);color:var(--info);}
+        .badge-transito{background:rgba(69,123,157,0.2);color:var(--accent);}
+        .badge-entregado{background:rgba(46,160,67,0.2);color:var(--success);}
+        .badge-en_ruta{background:rgba(69,123,157,0.2);color:var(--accent);}
+        .stat-row{display:flex;justify-content:space-between;align-items:center;padding:0.75rem 0;border-bottom:1px solid var(--card-border);}
+        .stat-row:last-child{border-bottom:none;}
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="{% url 'courier:index' %}">
+                <div style="width:40px;height:40px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-right:10px;"><i class="fas fa-truck" style="color:white;"></i></div>
+                <div><div style="font-size:1.05rem;line-height:1.2;">Music Pro Tour</div><div style="font-size:0.7rem;color:var(--text-secondary);font-weight:400;">Reportes</div></div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"><i class="fas fa-bars" style="color:var(--text-primary);"></i></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center gap-1">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:index' %}"><i class="fas fa-home me-1"></i> Inicio</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:dashboard' %}"><i class="fas fa-chart-line me-1"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:seguimiento' %}"><i class="fas fa-map-marker-alt me-1"></i> Seguimiento</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:envios' %}"><i class="fas fa-box me-1"></i> Envíos</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'courier:sucursales' %}"><i class="fas fa-store me-1"></i> Sucursales</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'courier:reportes' %}"><i class="fas fa-chart-bar me-1"></i> Reportes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <section style="padding:2rem 0;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <div>
+                    <h1 class="section-title"><span>Reportes</span> y Analítica</h1>
+                    <div class="section-divider"></div>
+                    <p style="color:var(--text-secondary);max-width:600px;">Panel de analítica avanzada con indicadores clave de rendimiento (KPIs), métricas de cumplimiento de tiempos (SLA) y análisis de costos operativos de transporte.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-custom"><i class="fas fa-calendar me-2"></i> Último Mes</button>
+                    <button class="btn btn-primary-custom"><i class="fas fa-download me-2"></i> Exportar PDF</button>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-shipping-fast mb-2" style="font-size:1.5rem;color:var(--primary);"></i>
+                        <div class="kpi-value">{{ kpis.paquetes_transportados }}</div>
+                        <div class="kpi-label">Paquetes Transportados</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-check-circle mb-2" style="font-size:1.5rem;color:var(--success);"></i>
+                        <div class="kpi-value" style="color:var(--success);">{{ kpis.envios_entregados }}</div>
+                        <div class="kpi-label">Entregas Completadas</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-clock mb-2" style="font-size:1.5rem;color:var(--warning);"></i>
+                        <div class="kpi-value" style="font-size:1.6rem;color:var(--warning);">{{ kpis.tiempo_promedio_entrega }}</div>
+                        <div class="kpi-label">Tiempo Promedio Entrega</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="kpi-card">
+                        <i class="fas fa-dollar-sign mb-2" style="font-size:1.5rem;color:var(--accent);"></i>
+                        <div class="kpi-value" style="font-size:1.5rem;color:var(--accent);">${{ kpis.costo_total_transporte|floatformat:0 }}</div>
+                        <div class="kpi-label">Costo Total Transporte</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card-dark mb-4">
+                        <div class="card-body p-4">
+                            <h5 style="font-weight:700;margin-bottom:1rem;"><i class="fas fa-chart-bar me-2" style="color:var(--primary);"></i> Envíos por Sucursal Destino</h5>
+                            <div style="background:var(--darker);border-radius:10px;padding:2rem;border:1px solid var(--card-border);">
+                                {% for sucursal in sucursales %}
+                                {% if not forloop.first %}
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span style="font-size:0.85rem;">{{ sucursal.ciudad }}</span>
+                                        <span style="font-size:0.85rem;color:var(--info);">{{ forloop.counter0 }}</span>
+                                    </div>
+                                    <div class="progress-bar-custom">
+                                        <div class="bar bar-info" style="width:{{ forloop.counter0|floatformat:0 }}0%;"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-dark">
+                        <div class="card-body p-4">
+                            <h5 style="font-weight:700;margin-bottom:1rem;"><i class="fas fa-clipboard-list me-2" style="color:var(--primary);"></i> Detalle de Envíos Recientes</h5>
+                            <div class="table-dark-custom">
+                                <table class="table table-borderless mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>N° Envío</th>
+                                            <th>Destino</th>
+                                            <th>Estado</th>
+                                            <th>SLA</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for envio in envios %}
+                                        <tr>
+                                            <td style="font-weight:600;">{{ envio.numero_envio }}</td>
+                                            <td>{{ envio.sucursal_destino.ciudad }}</td>
+                                            <td><span class="badge-estado badge-{{ envio.estado }}">{{ envio.get_estado_display }}</span></td>
+                                            <td>
+                                                {% if envio.progreso == 100 %}
+                                                <span style="color:var(--success);"><i class="fas fa-check-circle me-1"></i> Cumplido</span>
+                                                {% elif envio.progreso >= 50 %}
+                                                <span style="color:var(--info);"><i class="fas fa-spinner me-1"></i> En curso</span>
+                                                {% else %}
+                                                <span style="color:var(--warning);"><i class="fas fa-clock me-1"></i> Pendiente</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="card-dark mb-4">
+                        <div class="card-body p-4">
+                            <h5 style="font-weight:700;margin-bottom:1rem;"><i class="fas fa-tachometer-alt me-2" style="color:var(--primary);"></i> Resumen Operativo</h5>
+                            <div class="stat-row">
+                                <span style="color:var(--text-secondary);font-size:0.9rem;">Cumplimiento SLA</span>
+                                <span style="font-weight:700;color:var(--success);">{{ kpis.cumplimiento_sla }}%</span>
+                            </div>
+                            <div class="stat-row">
+                                <span style="color:var(--text-secondary);font-size:0.9rem;">Envíos Activos</span>
+                                <span style="font-weight:700;color:var(--info);">{{ kpis.envios_transito }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span style="color:var(--text-secondary);font-size:0.9rem;">Incidencias Abiertas</span>
+                                <span style="font-weight:700;color:var(--warning);">{{ kpis.incidencias_abiertas }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span style="color:var(--text-secondary);font-size:0.9rem;">Sucursales Activas</span>
+                                <span style="font-weight:700;">{{ kpis.sucursales_activas }}</span>
+                            </div>
+                            <div class="stat-row">
+                                <span style="color:var(--text-secondary);font-size:0.9rem;">Costo por Paquete</span>
+                                <span style="font-weight:700;">${% widthratio kpis.costo_total_transporte kpis.paquetes_transportados 1 %}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-dark">
+                        <div class="card-body p-4">
+                            <h5 style="font-weight:700;margin-bottom:1rem;"><i class="fas fa-chart-pie me-2" style="color:var(--primary);"></i> Distribución de Estados</h5>
+                            <div style="text-align:center;padding:1rem;">
+                                {% for envio in envios %}
+                                {% endfor %}
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background:var(--darker);border-radius:6px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:10px;height:10px;border-radius:50%;background:var(--accent);"></div>
+                                        <span style="font-size:0.85rem;">En Ruta</span>
+                                    </div>
+                                    <span style="font-weight:700;font-size:0.9rem;">4</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2 p-2" style="background:var(--darker);border-radius:6px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:10px;height:10px;border-radius:50%;background:var(--success);"></div>
+                                        <span style="font-size:0.85rem;">Entregados</span>
+                                    </div>
+                                    <span style="font-weight:700;font-size:0.9rem;">2</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center p-2" style="background:var(--darker);border-radius:6px;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:10px;height:10px;border-radius:50%;background:var(--warning);"></div>
+                                        <span style="font-size:0.85rem;">Pendientes</span>
+                                    </div>
+                                    <span style="font-weight:700;font-size:0.9rem;">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <div class="d-flex justify-content-between flex-wrap gap-2">
+                    <div>Music Pro Tour 2026 - Reportes y Analítica</div>
+                    <div>Programación Backend - INACAP</div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

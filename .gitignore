@@ -16,8 +16,10 @@ env/
 
 # Django
 *.sqlite3
+*.sqbpro
 *.db
 *.log
+.env
 
 # IDE / OS
 .vscode/
