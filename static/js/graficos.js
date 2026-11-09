@@ -1,45 +1,40 @@
-/* Gráficos del panel y de los reportes (Chart.js). Los datos vienen del ORM
-   a través de {{ datos|json_script }} para evitar inyección de HTML. */
+/* Tooltip de los gráficos.
+   Cualquier elemento con data-tip-valor / data-tip-etiqueta muestra su dato al
+   pasar el mouse o al recibir el foco con el teclado. El texto se inserta con
+   textContent (nunca innerHTML), porque los nombres vienen de la base de datos. */
 (function () {
-    const COLORES = ['#58a6ff', '#3fb950', '#e3b341', '#f85149', '#a371f7', '#f0883e', '#39c5cf', '#e63946'];
-    if (window.Chart) {
-        Chart.defaults.color = '#8b949e';
-        Chart.defaults.borderColor = '#30363d';
-        Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
+    const marcas = document.querySelectorAll('[data-tip-valor]');
+    if (!marcas.length) { return; }
+
+    const tooltip = document.createElement('div');
+    tooltip.className = 'viz-tooltip';
+    tooltip.setAttribute('aria-hidden', 'true');
+    const valor = document.createElement('strong');
+    const etiqueta = document.createElement('span');
+    tooltip.append(valor, etiqueta);
+    document.body.appendChild(tooltip);
+
+    function mostrar(marca, x, y) {
+        valor.textContent = marca.dataset.tipValor;
+        etiqueta.textContent = marca.dataset.tipEtiqueta || '';
+        tooltip.style.opacity = '1';
+        const ancho = tooltip.offsetWidth;
+        const alto = tooltip.offsetHeight;
+        const izquierda = Math.min(Math.max(8, x - ancho / 2), window.innerWidth - ancho - 8);
+        const arriba = y - alto - 12 < 8 ? y + 16 : y - alto - 12;
+        tooltip.style.left = izquierda + 'px';
+        tooltip.style.top = arriba + 'px';
     }
 
-    window.leerDatos = function (id) {
-        const nodo = document.getElementById(id);
-        return nodo ? JSON.parse(nodo.textContent) : { etiquetas: [], valores: [] };
-    };
+    function ocultar() { tooltip.style.opacity = '0'; }
 
-    function crear(id, config) {
-        const lienzo = document.getElementById(id);
-        if (lienzo && window.Chart) { return new Chart(lienzo, config); }
-        return null;
-    }
-
-    window.graficoDona = function (id, datos) {
-        return crear(id, {
-            type: 'doughnut',
-            data: { labels: datos.etiquetas, datasets: [{ data: datos.valores, backgroundColor: COLORES, borderWidth: 0 }] },
-            options: { plugins: { legend: { position: 'bottom' } }, cutout: '62%' }
+    marcas.forEach(function (marca) {
+        marca.addEventListener('pointermove', function (e) { mostrar(marca, e.clientX, e.clientY); });
+        marca.addEventListener('pointerleave', ocultar);
+        marca.addEventListener('focus', function () {
+            const r = marca.getBoundingClientRect();
+            mostrar(marca, r.left + r.width / 2, r.top);
         });
-    };
-
-    window.graficoBarras = function (id, datos) {
-        return crear(id, {
-            type: 'bar',
-            data: { labels: datos.etiquetas, datasets: [{ label: 'Viajes', data: datos.valores, backgroundColor: COLORES, borderRadius: 6 }] },
-            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-        });
-    };
-
-    window.graficoLinea = function (id, datos) {
-        return crear(id, {
-            type: 'line',
-            data: { labels: datos.etiquetas, datasets: [{ label: 'Viajes', data: datos.valores, borderColor: '#58a6ff', backgroundColor: 'rgba(88,166,255,.15)', fill: true, tension: .35 }] },
-            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
-        });
-    };
+        marca.addEventListener('blur', ocultar);
+    });
 })();

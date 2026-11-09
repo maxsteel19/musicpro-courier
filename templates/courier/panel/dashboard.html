@@ -1,107 +1,126 @@
 {% extends "base.html" %}
-{% load humanize_cl static %}
+{% load static %}
 {% block content %}
+
+{# Filtro de período: una sola fila sobre todo lo que filtra. #}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+    <nav class="viz-periodo" aria-label="Período del panel">
+        {% for clave, nombre in periodos %}
+        <a href="?periodo={{ clave }}" class="{% if clave == periodo %}activo{% endif %}" {% if clave == periodo %}aria-current="true"{% endif %}>{% if clave == periodo %}<i class="fas fa-check" aria-hidden="true"></i>{% endif %}{{ nombre }}</a>
+        {% endfor %}
+    </nav>
+    <span class="text-muted-custom small">Desde el {{ inicio|date:"d/m/Y" }} · las variaciones comparan con el período anterior de igual duración</span>
+</div>
+
+{# Indicadores en dos franjas #}
+<div class="card-dark mb-3">
+    <div class="viz-franja">
+        {% for k in indicadores|slice:":4" %}{% include "includes/graficos/indicador.html" %}{% endfor %}
+    </div>
+</div>
+<div class="card-dark mb-3">
+    <div class="viz-franja">
+        {% for k in indicadores|slice:"4:" %}{% include "includes/graficos/indicador.html" %}{% endfor %}
+    </div>
+</div>
+
+{# Evolución: ocupa todo el ancho #}
+<section class="card-dark mb-3">
+    <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+                <h2 class="viz-titulo">Evolución de viajes</h2>
+                <p class="viz-subtitulo">Viajes por {{ periodo_info.tramo }} en los últimos {{ periodo_info.nombre }} (sin cancelados)</p>
+            </div>
+            <div class="text-sm-end">
+                <div class="viz-cifra">{{ evolucion.total_txt }}</div>
+                <div class="text-muted-custom small">promedio {{ evolucion.promedio_txt }} por {{ periodo_info.tramo }}</div>
+            </div>
+        </div>
+        {% include "includes/graficos/columnas.html" with g=evolucion %}
+    </div>
+</section>
+
 <div class="row g-3 mb-3">
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-blue"><i class="fas fa-truck"></i></span>
-        <div><div class="kpi-label">Vehículos registrados</div><div class="kpi-value">{{ kpis.vehiculos }}</div><div class="kpi-sub">{{ kpis.vehiculos_disponibles }} disponibles</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-purple"><i class="fas fa-id-card"></i></span>
-        <div><div class="kpi-label">Conductores activos</div><div class="kpi-value">{{ kpis.conductores_activos }}</div><div class="kpi-sub">{{ kpis.viajes.en_curso }} viajes en curso</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-green"><i class="fas fa-route"></i></span>
-        <div><div class="kpi-label">Viajes finalizados</div><div class="kpi-value">{{ kpis.viajes.finalizados }}</div><div class="kpi-sub">de {{ kpis.viajes.total }} registrados</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-yellow"><i class="fas fa-clock"></i></span>
-        <div><div class="kpi-label">Viajes programados</div><div class="kpi-value">{{ kpis.viajes.programados }}</div><div class="kpi-sub">pendientes de ejecución</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-red"><i class="fas fa-truck-fast"></i></span>
-        <div><div class="kpi-label">Envíos en ruta / pendientes</div><div class="kpi-value">{{ kpis.envios.en_ruta }} / {{ kpis.envios.pendientes }}</div><div class="kpi-sub">{{ kpis.envios.hoy }} despachados hoy</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-green"><i class="fas fa-circle-check"></i></span>
-        <div><div class="kpi-label">Cumplimiento SLA</div><div class="kpi-value">{{ kpis.cumplimiento_sla }}%</div><div class="kpi-sub">{{ kpis.envios.a_tiempo }} de {{ kpis.envios.entregados }} entregados a tiempo</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-blue"><i class="fas fa-stopwatch"></i></span>
-        <div><div class="kpi-label">Tiempo promedio de entrega</div><div class="kpi-value">{{ kpis.horas_promedio_entrega }} h</div><div class="kpi-sub">desde el despacho</div></div>
-    </div></div>
-    <div class="col-sm-6 col-xl-3"><div class="card-dark kpi">
-        <span class="kpi-icon bg-soft-red"><i class="fas fa-triangle-exclamation"></i></span>
-        <div><div class="kpi-label">Incidencias abiertas</div><div class="kpi-value">{{ kpis.incidencias_abiertas }}</div><div class="kpi-sub">{{ kpis.sucursales_activas }} sucursales activas</div></div>
-    </div></div>
+    <div class="col-lg-6">
+        <section class="card-dark h-100">
+            <div class="card-body">
+                <h2 class="viz-titulo">Viajes por estado</h2>
+                <p class="viz-subtitulo">Salidas desde el {{ inicio|date:"d/m/Y" }}, incluidos los programados</p>
+                <div class="viz-cifra mt-3">{{ por_estado.total_txt }} <span class="fs-6 fw-normal text-muted-custom">viajes</span></div>
+                {% include "includes/graficos/segmentos.html" with g=por_estado unidad="viajes" %}
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-6">
+        <section class="card-dark h-100">
+            <div class="card-body">
+                <h2 class="viz-titulo">Viajes por tipo de vehículo</h2>
+                <p class="viz-subtitulo mb-3">Ordenado de mayor a menor · período seleccionado</p>
+                {% include "includes/graficos/barras.html" with g=por_tipo unidad="viajes" %}
+            </div>
+        </section>
+    </div>
 </div>
 
 <div class="row g-3 mb-3">
-    <div class="col-lg-4"><div class="card-dark h-100">
-        <div class="card-header">Viajes por estado</div>
-        <div class="card-body"><canvas id="graficoEstado" height="230" aria-label="Viajes por estado"></canvas></div>
-    </div></div>
-    <div class="col-lg-4"><div class="card-dark h-100">
-        <div class="card-header">Viajes por tipo de vehículo</div>
-        <div class="card-body"><canvas id="graficoTipo" height="230" aria-label="Viajes por tipo de vehículo"></canvas></div>
-    </div></div>
-    <div class="col-lg-4"><div class="card-dark h-100">
-        <div class="card-header">Viajes últimos 6 meses</div>
-        <div class="card-body"><canvas id="graficoMes" height="230" aria-label="Viajes por mes"></canvas></div>
-    </div></div>
-</div>
-
-<div class="row g-3 mb-3">
-    <div class="col-lg-5"><div class="card-dark h-100">
-        <div class="card-header"><i class="fas fa-trophy me-2" style="color:var(--warning);"></i>Top 5 conductores con más viajes</div>
-        <div class="table-responsive"><table class="table table-dark-custom">
-            <thead><tr><th>#</th><th>Conductor</th><th class="text-end">Viajes</th><th class="text-end">% part.</th></tr></thead>
-            <tbody>
-            {% for c in top_conductores %}
-            <tr><td>{{ forloop.counter }}</td><td>{{ c.nombre }}</td><td class="text-end">{{ c.total }}</td><td class="text-end">{{ c.total|porcentaje:total_viajes }}%</td></tr>
-            {% empty %}<tr><td colspan="4" class="text-muted-custom">Sin viajes registrados.</td></tr>{% endfor %}
-            </tbody>
-        </table></div>
-    </div></div>
-    <div class="col-lg-7"><div class="card-dark h-100">
-        <div class="card-header d-flex justify-content-between"><span><i class="fas fa-route me-2" style="color:var(--info);"></i>Últimos viajes</span><a href="{% url 'courier:viaje_lista' %}" class="small text-decoration-none">Ver todos</a></div>
-        <div class="table-responsive"><table class="table table-dark-custom">
-            <thead><tr><th>N.º</th><th>Vehículo</th><th>Conductor</th><th>Ruta</th><th>Salida</th><th>Estado</th></tr></thead>
-            <tbody>
-            {% for v in ultimos_viajes %}
-            <tr>
-                <td class="text-nowrap"><a href="{% url 'courier:viaje_detalle' v.pk %}" class="text-decoration-none">{{ v.codigo }}</a></td>
-                <td><small>{{ v.vehiculo.patente }}</small></td>
-                <td><small>{{ v.conductor.nombre }}</small></td>
-                <td><small>{{ v.origen }} → {{ v.destino }}</small></td>
-                <td><small>{{ v.fecha_salida|date:"d/m/Y" }}</small></td>
-                <td><span class="badge-estado badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
-            </tr>
-            {% empty %}<tr><td colspan="6" class="text-muted-custom">Sin viajes registrados.</td></tr>{% endfor %}
-            </tbody>
-        </table></div>
-    </div></div>
+    <div class="col-lg-5">
+        <section class="card-dark h-100">
+            <div class="card-body">
+                <h2 class="viz-titulo">Conductores con más viajes</h2>
+                <p class="viz-subtitulo mb-2">Top 5 del período · % sobre {{ total_periodo }} viajes</p>
+                {% include "includes/graficos/medidores.html" with g=top_conductores unidad="viajes" %}
+            </div>
+        </section>
+    </div>
+    <div class="col-lg-7">
+        <section class="card-dark h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h2 class="viz-titulo">Últimos viajes</h2>
+                        <p class="viz-subtitulo">Salidas más recientes</p>
+                    </div>
+                    <a href="{% url 'courier:viaje_lista' %}" class="small text-decoration-none">Ver todos</a>
+                </div>
+                <ol class="viz-linea-tiempo">
+                    {% for v in ultimos_viajes %}
+                    <li>
+                        <span class="viz-punto" style="background: var(--viz-{% if v.estado == 'en_curso' %}en-curso{% else %}{{ v.estado }}{% endif %});"></span>
+                        <div class="d-flex flex-wrap justify-content-between gap-2">
+                            <a href="{% url 'courier:viaje_detalle' v.pk %}" class="fw-semibold text-decoration-none">{{ v.origen }} → {{ v.destino }}</a>
+                            <small class="text-muted-custom text-nowrap">{{ v.fecha_salida|date:"d/m/Y H:i" }}</small>
+                        </div>
+                        <small class="text-muted-custom">{{ v.codigo }} · {{ v.vehiculo.patente }} ({{ v.vehiculo.tipo_vehiculo }}) · {{ v.conductor.nombre }} · {{ v.get_estado_display }}</small>
+                    </li>
+                    {% empty %}
+                    <li class="text-muted-custom small">Sin viajes registrados.</li>
+                    {% endfor %}
+                </ol>
+            </div>
+        </section>
+    </div>
 </div>
 
 <div class="row g-3">
     <div class="col-lg-7"><div class="card-dark h-100">
-        <div class="card-header d-flex justify-content-between"><span><i class="fas fa-truck-fast me-2" style="color:var(--primary);"></i>Envíos activos (por prioridad)</span><a href="{% url 'courier:seguimiento' %}" class="small text-decoration-none">Seguimiento</a></div>
+        <div class="card-header d-flex justify-content-between"><span>Envíos activos (por prioridad)</span><a href="{% url 'courier:seguimiento' %}" class="small text-decoration-none">Seguimiento</a></div>
         <div class="table-responsive"><table class="table table-dark-custom">
             <thead><tr><th>N.º</th><th>Ruta</th><th>Prioridad</th><th>Progreso</th></tr></thead>
             <tbody>
             {% for e in envios_activos %}
             <tr>
-                <td><a href="{% url 'courier:envio_detalle' e.pk %}" class="text-decoration-none">{{ e.numero_envio }}</a></td>
+                <td class="text-nowrap"><a href="{% url 'courier:envio_detalle' e.pk %}" class="text-decoration-none">{{ e.numero_envio }}</a></td>
                 <td><small>{{ e.sucursal_origen.ciudad }} → {{ e.sucursal_destino.ciudad }}</small></td>
                 <td><span class="badge-estado badge-{{ e.prioridad }}">{{ e.get_prioridad_display }}</span></td>
-                <td style="min-width:120px;"><div class="progress"><div class="progress-bar" style="width:{{ e.progreso }}%"></div></div></td>
+                <td style="min-width:130px;"><div class="d-flex align-items-center gap-2"><div class="viz-medidor-pista flex-grow-1"><div class="viz-medidor-barra" style="width:{{ e.progreso }}%"></div></div><small class="text-muted-custom">{{ e.progreso }}%</small></div></td>
             </tr>
             {% empty %}<tr><td colspan="4" class="text-muted-custom">No hay envíos activos.</td></tr>{% endfor %}
             </tbody>
         </table></div>
     </div></div>
     <div class="col-lg-5"><div class="card-dark h-100">
-        <div class="card-header d-flex justify-content-between"><span><i class="fas fa-triangle-exclamation me-2" style="color:var(--danger);"></i>Incidencias abiertas</span><a href="{% url 'courier:incidencia_lista' %}?estado=abierta" class="small text-decoration-none">Ver todas</a></div>
+        <div class="card-header d-flex justify-content-between"><span>Incidencias abiertas</span><a href="{% url 'courier:incidencia_lista' %}?estado=abierta" class="small text-decoration-none">Ver todas</a></div>
         <ul class="list-group list-group-flush">
             {% for i in incidencias %}
             <li class="list-group-item bg-transparent text-light border-secondary small">
@@ -112,18 +131,8 @@
         </ul>
     </div></div>
 </div>
-
-{{ viajes_estado|json_script:"datos-estado" }}
-{{ viajes_tipo|json_script:"datos-tipo" }}
-{{ viajes_mes|json_script:"datos-mes" }}
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
 <script src="{% static 'js/graficos.js' %}"></script>
-<script>
-    graficoDona('graficoEstado', leerDatos('datos-estado'));
-    graficoBarras('graficoTipo', leerDatos('datos-tipo'));
-    graficoLinea('graficoMes', leerDatos('datos-mes'));
-</script>
 {% endblock %}

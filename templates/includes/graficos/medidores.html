@@ -1,0 +1,17 @@
+{% load l10n %}{% localize off %}
+{# Ranking con medidores finos. Variables: g (graficos.barras_ranking), unidad #}
+<div role="list">
+    {% for f in g.filas %}
+    <div class="viz-medidor" role="listitem" tabindex="0"
+         data-tip-valor="{{ f.valor_txt }} {{ unidad|default:'registros' }} · {{ f.cuota_txt }} del total" data-tip-etiqueta="{{ f.etiqueta }}{% if f.detalle %} · {{ f.detalle }}{% endif %}">
+        <div class="viz-medidor-cab">
+            <span class="viz-medidor-nombre"><span class="viz-medidor-pos">{{ f.posicion }}</span>{{ f.etiqueta }}</span>
+            <span class="viz-medidor-valor">{{ f.valor_txt }}<small>{{ f.cuota_txt }}</small></span>
+        </div>
+        <div class="viz-medidor-pista"><div class="viz-medidor-barra" style="width: {{ f.ancho }}%;"></div></div>
+    </div>
+    {% empty %}
+    <p class="text-muted-custom small mb-0">Sin datos en el período.</p>
+    {% endfor %}
+</div>
+{% endlocalize %}

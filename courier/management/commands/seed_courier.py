@@ -66,6 +66,9 @@ INSTRUMENTOS = [
 
 LICENCIAS = ['Clase A2', 'Clase A3', 'Clase A4', 'Clase A5', 'Clase B']
 
+VIAJES = 650   # repartidos en ~14 meses (unos 1,5 por día)
+ENVIOS = 300
+
 
 class Command(BaseCommand):
     help = 'Carga datos de prueba del sistema Courier y Transporte de Music Pro.'
@@ -168,7 +171,7 @@ class Command(BaseCommand):
         pesos_conductor = [random.randint(1, 10) for _ in activos]
         ciudades = [s.ciudad for s in sucursales]
         viajes = []
-        for _ in range(220):
+        for _ in range(VIAJES):
             dias = random.randint(-420, 30)  # ~14 meses atrás hasta 30 días adelante
             salida = (self.ahora + timedelta(days=dias)).replace(
                 hour=random.randint(6, 20), minute=random.choice([0, 15, 30, 45]), second=0, microsecond=0)
@@ -206,7 +209,7 @@ class Command(BaseCommand):
 
     def _crear_paquetes(self):
         paquetes = []
-        for numero in range(1, 91):
+        for numero in range(1, ENVIOS + 1):
             paquetes.append(Paquete.objects.create(
                 codigo=f'PKG-2026-{numero:04d}',
                 descripcion=random.choice(INSTRUMENTOS),
@@ -238,7 +241,9 @@ class Command(BaseCommand):
             real = None
             if estado_viaje == 'finalizado':
                 estado, progreso = 'entregado', 100
-                real = (viaje.fecha_llegada or despacho) + timedelta(hours=random.randint(0, 30))
+                # La mayoría se entrega dentro del plazo estimado; algunos llegan tarde.
+                real = min(self.ahora, (viaje.fecha_llegada or despacho)
+                           + timedelta(hours=random.choice([0, 1, 2, 3, 4, 6, 8, 30])))
             elif estado_viaje == 'en_curso':
                 estado, progreso = 'en_ruta', random.randint(20, 90)
             elif estado_viaje == 'cancelado':
@@ -266,12 +271,16 @@ class Command(BaseCommand):
             'danio': 'Embalaje con golpes detectado al momento de la descarga.',
             'otra': 'Destinatario no disponible en el horario acordado.',
         }
-        for envio in random.sample(envios, 22):
+        for envio in random.sample(envios, 40):
             tipo = random.choice(list(descripciones))
-            Incidencia.objects.create(
+            incidencia = Incidencia.objects.create(
                 envio=envio, tipo=tipo, descripcion=descripciones[tipo],
                 resuelta=envio.estado in ('entregado', 'cancelado') or random.random() < 0.3,
             )
+            # "fecha" usa auto_now_add; se ajusta después para que coincida con el viaje del envío.
+            if envio.fecha_despacho and envio.fecha_despacho < self.ahora:
+                fecha = min(self.ahora, envio.fecha_despacho + timedelta(hours=random.randint(1, 12)))
+                Incidencia.objects.filter(pk=incidencia.pk).update(fecha=fecha)
         for envio in envios:
             if envio.estado == 'pendiente' and random.random() < 0.5:
                 continue
@@ -282,5 +291,8 @@ class Command(BaseCommand):
                 'entregado': f'Su envío {envio.numero_envio} fue entregado en {envio.sucursal_destino.ciudad}.',
                 'cancelado': f'Su envío {envio.numero_envio} fue cancelado. Contáctenos para más información.',
             }[envio.estado]
-            Notificacion.objects.create(envio=envio, canal=canal, mensaje=mensaje,
-                                        enviada=envio.estado != 'pendiente')
+            notificacion = Notificacion.objects.create(envio=envio, canal=canal, mensaje=mensaje,
+                                                       enviada=envio.estado != 'pendiente')
+            momento = envio.fecha_entrega_real or envio.fecha_despacho
+            if momento and momento < self.ahora:
+                Notificacion.objects.filter(pk=notificacion.pk).update(fecha_envio=momento)

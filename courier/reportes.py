@@ -26,7 +26,8 @@ class Resultado:
     columnas: list
     filas: list
     resumen: str = ''
-    grafico: dict = field(default_factory=dict)  # {'tipo': 'bar', 'etiquetas': [...], 'valores': [...]}
+    # {'tipo': 'segmentos' | 'ranking' | 'columnas', 'etiquetas': [...], 'valores': [...]}
+    grafico: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -177,7 +178,8 @@ def viajes_por_estado(p):
     filas = [[nombre, conteo.get(clave, 0)] for clave, nombre in Viaje.ESTADO_CHOICES]
     return Resultado(['Estado', 'Viajes'], filas,
                      f'Total: {sum(conteo.values())} viajes.',
-                     {'tipo': 'doughnut', 'etiquetas': [f[0] for f in filas], 'valores': [f[1] for f in filas]})
+                     {'tipo': 'segmentos', 'etiquetas': [f[0] for f in filas], 'valores': [f[1] for f in filas],
+                      'claves': [clave for clave, _ in Viaje.ESTADO_CHOICES]})
 
 
 @reporte(9, 'Intermedio', '¿Cuáles son los viajes programados durante un rango de fechas?',
@@ -208,7 +210,7 @@ def top_conductores(p):
     filas = [[i, c.nombre, c.rut, c.total_viajes, f'{_porcentaje(c.total_viajes, total)} %']
              for i, c in enumerate(conductores, start=1)]
     return Resultado(['#', 'Conductor', 'RUT', 'Viajes', '% participación'], filas,
-                     grafico={'tipo': 'bar', 'etiquetas': [f[1] for f in filas], 'valores': [f[3] for f in filas]})
+                     grafico={'tipo': 'ranking', 'etiquetas': [f[1] for f in filas], 'valores': [f[3] for f in filas]})
 
 
 @reporte(12, 'Intermedio', '¿Cuáles son los cinco vehículos que han participado en más viajes?')
@@ -219,7 +221,7 @@ def top_vehiculos(p):
     filas = [[i, v.patente, v.tipo_vehiculo.nombre, f'{v.marca} {v.modelo}', v.total_viajes]
              for i, v in enumerate(vehiculos, start=1)]
     return Resultado(['#', 'Patente', 'Tipo', 'Vehículo', 'Viajes'], filas,
-                     grafico={'tipo': 'bar', 'etiquetas': [f[1] for f in filas], 'valores': [f[4] for f in filas]})
+                     grafico={'tipo': 'ranking', 'etiquetas': [f[1] for f in filas], 'valores': [f[4] for f in filas]})
 
 
 # ===========================================================================
@@ -247,7 +249,7 @@ def tipos_mas_utilizados(p):
              .order_by('-total_viajes', 'nombre'))
     filas = [[t.nombre, t.vehiculos_distintos, t.total_viajes] for t in tipos]
     return Resultado(['Tipo de vehículo', 'Vehículos', 'Viajes'], filas,
-                     grafico={'tipo': 'bar', 'etiquetas': [f[0] for f in filas], 'valores': [f[2] for f in filas]})
+                     grafico={'tipo': 'ranking', 'etiquetas': [f[0] for f in filas], 'valores': [f[2] for f in filas]})
 
 
 @reporte(15, 'Avanzado', '¿Cuántos viajes se han realizado hacia cada destino?')
@@ -259,7 +261,7 @@ def viajes_por_destino(p):
                 .order_by('-total', 'destino'))
     filas = [[d['destino'], d['total'], d['finalizados']] for d in destinos]
     return Resultado(['Destino', 'Viajes (sin cancelados)', 'Finalizados'], filas,
-                     grafico={'tipo': 'bar', 'etiquetas': [f[0] for f in filas], 'valores': [f[1] for f in filas]})
+                     grafico={'tipo': 'ranking', 'etiquetas': [f[0] for f in filas], 'valores': [f[1] for f in filas]})
 
 
 @reporte(16, 'Avanzado', '¿Qué conductores no han realizado viajes durante un período seleccionado?',
@@ -327,8 +329,8 @@ def porcentaje_por_estado(p):
          f"{_porcentaje(totales['pendientes'], total)} %"],
     ]
     return Resultado(['Estado', 'Viajes', 'Porcentaje'], filas, f'Total de viajes: {total}.',
-                     {'tipo': 'doughnut', 'etiquetas': ['Finalizados', 'Cancelados', 'Pendientes'],
-                      'valores': [f[1] for f in filas]})
+                     {'tipo': 'segmentos', 'etiquetas': ['Finalizados', 'Cancelados', 'Pendientes'],
+                      'valores': [f[1] for f in filas], 'claves': ['finalizado', 'cancelado', 'pendiente']})
 
 
 @reporte(20, 'Análisis', '¿Cómo se distribuye la cantidad de viajes realizados por mes durante el año seleccionado?',
@@ -347,4 +349,4 @@ def viajes_por_mes(p):
     filas = [[MESES[mes - 1], conteos[f'mes_{mes}']] for mes in range(1, 13)]
     return Resultado(['Mes', 'Viajes (sin cancelados)'], filas,
                      f'Total {anio}: {sum(f[1] for f in filas)} viajes.',
-                     {'tipo': 'line', 'etiquetas': [f[0] for f in filas], 'valores': [f[1] for f in filas]})
+                     {'tipo': 'columnas', 'etiquetas': [f[0] for f in filas], 'valores': [f[1] for f in filas]})

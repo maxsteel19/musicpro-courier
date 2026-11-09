@@ -1,0 +1,18 @@
+{% load l10n %}
+{# Indicador (stat tile): etiqueta, valor, variación y minigráfico. Variable: k #}
+<div class="viz-tile">
+    <div class="viz-tile-etq">{{ k.etiqueta }}</div>
+    <div class="viz-tile-fila">
+        <div class="viz-tile-valor">{{ k.valor }}</div>
+        {% if k.linea %}{% localize off %}
+        <svg class="viz-spark" width="{{ k.linea.ancho }}" height="{{ k.linea.alto }}" viewBox="0 0 {{ k.linea.ancho }} {{ k.linea.alto }}" aria-hidden="true">
+            <polyline points="{{ k.linea.puntos }}"></polyline>
+            <circle cx="{{ k.linea.ultimo_x }}" cy="{{ k.linea.ultimo_y }}" r="4"></circle>
+        </svg>{% endlocalize %}
+        {% endif %}
+    </div>
+    {% if k.variacion %}
+    <div class="viz-delta viz-delta-{{ k.variacion.sentido }}"><i class="fas {{ k.variacion.icono }} me-1" aria-hidden="true"></i>{{ k.variacion.texto }}{% if not k.variacion.sin_base %} <span>vs. período anterior</span>{% endif %}</div>
+    {% endif %}
+    {% if k.detalle %}<div class="viz-tile-det">{{ k.detalle }}</div>{% endif %}
+</div>

@@ -71,7 +71,23 @@ La página **Reportes ORM** (`/reportes/`) tiene los **20 reportes** del proyect
 
 ---
 
-## 2. Modelo de datos
+## 2. Panel de control y gráficos
+
+El panel (`/panel/`) toma como guía de contenido la imagen de referencia del docx (indicadores, viajes por estado, viajes por tipo de vehículo, evolución, top 5 de conductores y últimos viajes), pero con un **diseño propio y distinto**:
+
+| Contenido de la referencia | Cómo se muestra en este proyecto |
+|---|---|
+| Selector "Período" | Control segmentado: 7 días · 30 días · 90 días · 12 meses. Filtra **todo** el panel |
+| Tarjetas de indicadores | Franjas de indicadores con variación frente al período anterior (flecha y signo, no solo color) y un minigráfico de tendencia |
+| Dona "Viajes por estado" | **Barra segmentada** con el % de cada estado, leyenda con iconos y tabla equivalente |
+| Barras verticales por tipo de vehículo | **Barras horizontales** ordenadas de mayor a menor, con el valor en la punta |
+| Línea "Evolución de viajes" | **Columnas** por día, semana o mes, a todo el ancho, con eje y líneas guía finas. Se rotulan solo el máximo y el último valor |
+| Tabla "Top 5 conductores" | **Medidores** horizontales con posición, viajes y % de participación |
+| Tabla "Últimos viajes" | **Línea de tiempo** con el estado de cada viaje |
+
+Los gráficos están hechos con HTML y CSS propios, sin librerías de gráficos. Cada uno tiene un tooltip (con mouse o teclado) y un botón **"Ver como tabla"**. Los colores de los estados se validaron para personas con daltonismo y para el contraste sobre el fondo oscuro. Todos los datos salen de consultas ORM con agregación condicional (`Count(..., filter=Q(...))`), una consulta por gráfico.
+
+## 3. Modelo de datos
 
 ```mermaid
 erDiagram
@@ -179,7 +195,7 @@ erDiagram
 
 ---
 
-## 3. Estructura del proyecto
+## 4. Estructura del proyecto
 
 ```text
 musicpro/                 Configuración del proyecto (settings, urls, wsgi)
@@ -190,6 +206,7 @@ courier/
     decorators.py         @administrador_requerido
     middleware.py         Sin caché para usuarios autenticados
     reportes.py           Las 20 consultas ORM del informe
+    graficos.py           Datos de los gráficos (proporciones, escalas, variaciones)
     views/
         publico.py        Página pública
         cuentas.py        Login, logout y cambio de contraseña
@@ -200,24 +217,24 @@ courier/
         utils.py          Paginación y helpers de crear/editar/eliminar
     management/commands/seed_courier.py   Datos de prueba con Faker
     migrations/
-    tests/                Pruebas automáticas (52)
+    tests/                Pruebas automáticas (60)
 templates/                Plantillas (base con menú lateral, CRUD, reportes)
-static/                   CSS, JS y librerías locales (Bootstrap, Font Awesome, Chart.js)
+static/                   CSS, JS (tooltips) y librerías locales (Bootstrap, Font Awesome)
 docs/GUIA_DEFENSA.md      Guía para explicar el proyecto en la defensa
 Ejercicios/               Ejercicios de clase (proyecto independiente)
 ```
 
 ---
 
-## 4. Instalación y ejecución (Windows)
+## 5. Instalación y ejecución (Windows)
 
-### 4.1 Requisitos
+### 5.1 Requisitos
 
 - Python 3.12 o superior
 - MySQL Server **8.4 o superior** (o MariaDB 10.11+), corriendo en local
   - Si tiene MySQL 8.0, instale Django 5.2 LTS: `pip install "Django>=5.2,<6.0"`
 
-### 4.2 Clonar e instalar dependencias
+### 5.2 Clonar e instalar dependencias
 
 ```bash
 git clone https://github.com/maxsteel19/musicpro-courier.git
@@ -227,7 +244,7 @@ env\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4.3 Crear la base de datos en MySQL
+### 5.3 Crear la base de datos en MySQL
 
 Desde MySQL Workbench o la consola `mysql -u root -p`:
 
@@ -240,7 +257,7 @@ GRANT ALL PRIVILEGES ON test_musicpro_courier.* TO 'musicpro'@'localhost';  -- p
 FLUSH PRIVILEGES;
 ```
 
-### 4.4 Configurar las credenciales
+### 5.4 Configurar las credenciales
 
 Copie `.env.example` como `.env` y complete los datos de su MySQL:
 
@@ -259,7 +276,7 @@ DB_PORT=3306
 
 El archivo `.env` está en `.gitignore`: las claves nunca se suben a GitHub.
 
-### 4.5 Migrar, cargar datos y crear el administrador
+### 5.5 Migrar, cargar datos y crear el administrador
 
 ```bash
 python manage.py migrate
@@ -272,9 +289,9 @@ python manage.py runserver
 - Login: http://127.0.0.1:8000/cuentas/login/
 - Panel: http://127.0.0.1:8000/panel/
 
-`seed_courier` carga 8 sucursales, 5 tipos de vehículo, 22 vehículos, 16 conductores, unos 225 viajes repartidos en los últimos 14 meses, 90 paquetes, 90 envíos, incidencias y notificaciones. Use `python manage.py seed_courier --limpiar` para regenerarlos.
+`seed_courier` carga 8 sucursales, 5 tipos de vehículo, 22 vehículos, 16 conductores, unos 650 viajes repartidos en los últimos 14 meses, 300 paquetes, 300 envíos, incidencias y notificaciones. Use `python manage.py seed_courier --limpiar` para regenerarlos.
 
-### 4.6 Roles
+### 5.6 Roles
 
 | Rol | Cómo se obtiene | Acceso |
 |---|---|---|
@@ -284,13 +301,13 @@ python manage.py runserver
 
 ---
 
-## 5. Pruebas automáticas
+## 6. Pruebas automáticas
 
 ```bash
 python manage.py test courier
 ```
 
-Son 52 pruebas que verifican, entre otras cosas:
+Son 60 pruebas que verifican, entre otras cosas:
 
 - login correcto e incorrecto, usuario desactivado, parámetro `next` seguro y cambio de id de sesión,
 - que **todas** las URLs privadas redirigen al login sin sesión, y que un POST sin sesión no modifica la base,
@@ -298,13 +315,14 @@ Son 52 pruebas que verifican, entre otras cosas:
 - la mantención de usuarios y sus restricciones (operador = 403, no auto-desactivarse, etc.),
 - crear, editar y eliminar cada una de las 9 entidades, y que el cambio quede en la base de datos,
 - las validaciones (RUT, patente, fechas, origen ≠ destino, registros protegidos),
-- los 20 reportes y la exactitud de sus resultados.
+- los 20 reportes y la exactitud de sus resultados,
+- los cálculos de los gráficos y el panel en cada período (7 días, 30 días, 90 días y 12 meses).
 
 Para correrlas sin MySQL (por ejemplo, en otro computador): `set DB_ENGINE=sqlite` y luego el mismo comando.
 
 ---
 
-## 6. Seguridad aplicada
+## 7. Seguridad aplicada
 
 - Contraseñas guardadas con hash (PBKDF2 de Django) y validadores de largo mínimo, contraseñas comunes, solo números y similitud con el usuario.
 - Protección **CSRF** en todos los formularios. El logout y la desactivación de usuarios solo aceptan POST.
@@ -314,11 +332,11 @@ Para correrlas sin MySQL (por ejemplo, en otro computador): `set DB_ENGINE=sqlit
 - Control de acceso por rol: solo los administradores gestionan usuarios, y solo un superusuario puede modificar a otro superusuario. Nadie puede desactivarse ni quitarse su propio rol.
 - La redirección `next` del login solo acepta URLs del propio sitio (evita redirecciones abiertas).
 - La clave secreta y las credenciales de la base van en `.env`, no en el código. Con `DEBUG=False`, el sistema exige `DJANGO_SECRET_KEY`.
-- El ORM parametriza todas las consultas, lo que previene inyección SQL. Las plantillas escapan HTML, y los datos de los gráficos viajan con `json_script`.
+- El ORM parametriza todas las consultas, lo que previene inyección SQL. Las plantillas escapan HTML, y el tooltip de los gráficos inserta los textos con `textContent`.
 
 ---
 
-## 7. Uso de inteligencia artificial como apoyo
+## 8. Uso de inteligencia artificial como apoyo
 
 Se usó un asistente de IA (Claude) para analizar el enunciado, proponer la estructura, generar y revisar código, y sugerir medidas de seguridad. Las recomendaciones se evaluaron antes de aplicarlas:
 
@@ -335,7 +353,7 @@ Se usó un asistente de IA (Claude) para analizar el enunciado, proponer la estr
 
 ---
 
-## 8. Evaluación anterior
+## 9. Evaluación anterior
 
 La Evaluación 2 (Django Admin) sigue disponible en el historial de Git (commit `89bb814`). Desde la Evaluación 3, la administración se hace solo con el sistema propio.
 

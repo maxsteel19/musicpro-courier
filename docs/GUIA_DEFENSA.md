@@ -156,13 +156,22 @@ Si listas 100 viajes y en la plantilla muestras `viaje.conductor.nombre`, Django
 
 ---
 
-## 9. Pruebas
+## 9. Panel y gráficos
 
-`python manage.py test courier` ejecuta 52 pruebas (carpeta `courier/tests/`). Si te preguntan cómo sabes que la protección funciona, muestra `test_autenticacion.py`.
+- **Vista:** `dashboard` en `courier/views/panel.py`. Lee `?periodo=7|30|90|365` y divide el período en tramos (días, semanas o meses) con `tramos_del_periodo()`.
+- **Conteo por tramo en una sola consulta:** `contar_por_tramos()` arma un `aggregate()` con un `Count('id', filter=Q(fecha__gte=inicio, fecha__lt=fin))` por cada tramo.
+- **Variación:** cada indicador se calcula dos veces, para el período actual y para el anterior de igual duración. `graficos.variacion()` decide si el cambio es bueno o malo (por ejemplo, que suban las horas de entrega es malo).
+- **Dibujo:** `courier/graficos.py` solo calcula proporciones y escalas. Las barras son `<div>` con `width` o `height` en %, en las plantillas `templates/includes/graficos/`.
+- **¿Por qué una barra segmentada y no una dona?** Para comparar partes de un total, el ojo compara longitudes mejor que ángulos. Además, cada parte muestra su %.
+- **¿Por qué `distinct=True` en "Conductores activos"?** El `JOIN` con viajes repite cada conductor una vez por viaje. Sin `distinct`, el conteo se infla.
+
+## 10. Pruebas
+
+`python manage.py test courier` ejecuta 60 pruebas (carpeta `courier/tests/`). Si te preguntan cómo sabes que la protección funciona, muestra `test_autenticacion.py`.
 
 ---
 
-## 10. Preguntas rápidas
+## 11. Preguntas rápidas
 
 - **¿Dónde se guardan las contraseñas?** En `auth_user.password`, como hash PBKDF2 con sal (formato `pbkdf2_sha256$iteraciones$sal$hash`).
 - **¿Qué es CSRF?** Un ataque en el que otro sitio envía formularios en tu nombre. `{% csrf_token %}` agrega un token secreto que Django verifica en cada POST.

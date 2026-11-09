@@ -329,3 +329,185 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert
     background: rgba(13, 17, 23, .95);
     border-bottom: 2px solid var(--primary);
 }
+
+/* =====================================================================
+   Gráficos (HTML/CSS propio, sin librerías)
+   Colores validados para daltonismo y contraste sobre --card-bg.
+   ===================================================================== */
+:root {
+    --viz-serie-1: #3987e5;
+    --viz-serie-2: #d95926;
+    --viz-serie-3: #199e70;
+    --viz-serie-4: #c98500;
+    --viz-serie-5: #d55181;
+    --viz-serie-6: #008300;
+    --viz-finalizado: #0ca30c;
+    --viz-en-curso: #3987e5;
+    --viz-programado: #c98500;
+    --viz-cancelado: #d03b3b;
+    --viz-pista: #1f3550;          /* fondo de medidores: mismo tono azul, más oscuro */
+    --viz-grilla: #262c36;
+    --viz-base: #3a414c;
+    --viz-tenue: #6e7681;           /* minigráficos (tono de contexto) */
+    --viz-bueno: #0ca30c;
+    --viz-malo: #f85149;
+}
+
+/* ---------- Selector de período (control segmentado) ---------- */
+.viz-periodo {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+}
+.viz-periodo a {
+    padding: .35rem .85rem;
+    border-radius: 7px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: .85rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+.viz-periodo a:hover { background: rgba(255, 255, 255, .05); color: var(--text-primary); }
+.viz-periodo a.activo { background: var(--card-bg); color: var(--text-primary); box-shadow: inset 0 0 0 1px var(--card-border); }
+.viz-periodo a.activo i { font-size: .7rem; margin-right: .35rem; color: var(--viz-serie-1); }
+
+/* ---------- Indicadores (stat tiles en franja) ---------- */
+.viz-franja {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.viz-tile { padding: 1rem 1.25rem; min-width: 0; }
+.viz-tile + .viz-tile { border-left: 1px solid var(--card-border); }
+.viz-tile-etq { font-size: .8rem; color: var(--text-secondary); margin-bottom: .35rem; }
+.viz-tile-fila { display: flex; align-items: flex-end; justify-content: space-between; gap: .75rem; }
+.viz-tile-valor { font-size: 1.75rem; font-weight: 600; line-height: 1.1; }
+.viz-tile-det { font-size: .75rem; color: var(--text-secondary); margin-top: .3rem; }
+.viz-delta { font-size: .78rem; margin-top: .35rem; font-weight: 600; }
+.viz-delta span { font-weight: 400; color: var(--text-secondary); }
+.viz-delta-bueno { color: var(--viz-bueno); }
+.viz-delta-malo { color: var(--viz-malo); }
+.viz-delta-neutro { color: var(--text-secondary); }
+.viz-spark { flex-shrink: 0; overflow: visible; }
+.viz-spark polyline { fill: none; stroke: var(--viz-tenue); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.viz-spark circle { fill: var(--viz-serie-1); stroke: var(--card-bg); stroke-width: 2; }
+
+@media (max-width: 991.98px) {
+    .viz-franja { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .viz-tile:nth-child(odd) { border-left: none; }
+    .viz-tile:nth-child(n+3) { border-top: 1px solid var(--card-border); }
+}
+
+/* ---------- Encabezado de cada gráfico ---------- */
+.viz-titulo { font-weight: 600; margin: 0; font-size: 1rem; }
+.viz-subtitulo { color: var(--text-secondary); font-size: .8rem; margin: .15rem 0 0; }
+.viz-cifra { font-size: 2.1rem; font-weight: 600; line-height: 1; }
+
+/* ---------- Barra segmentada (reparto de un total) ---------- */
+.viz-seg { display: flex; gap: 2px; height: 28px; margin: 1rem 0 .75rem; }
+.viz-seg-parte {
+    flex: 1 1 0;
+    min-width: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding-left: .5rem;
+    font-size: .78rem;
+    font-weight: 600;
+    color: #fff;
+    cursor: default;
+    white-space: nowrap;
+    outline-offset: 2px;
+}
+.viz-seg-parte.oscuro { color: #0b0b0b; }
+.viz-seg-parte:hover, .viz-seg-parte:focus-visible { filter: brightness(1.15); }
+.viz-leyenda { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; list-style: none; padding: 0; margin: 0; font-size: .82rem; color: var(--text-secondary); }
+.viz-leyenda li { display: inline-flex; align-items: center; gap: .4rem; }
+.viz-muestra { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.viz-leyenda i { font-size: .75rem; color: var(--text-secondary); }
+
+/* ---------- Barras horizontales ---------- */
+.viz-hbar { display: grid; grid-template-columns: minmax(80px, 30%) 1fr; align-items: center; gap: .75rem; padding: .3rem 0; border-radius: 6px; outline-offset: 2px; }
+.viz-hbar:hover, .viz-hbar:focus-visible { background: rgba(255, 255, 255, .03); }
+.viz-hbar-etq { font-size: .85rem; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viz-hbar-area { display: flex; align-items: center; gap: .5rem; border-left: 1px solid var(--viz-base); min-height: 22px; }
+.viz-hbar-barra { height: 16px; background: var(--viz-serie-1); border-radius: 0 4px 4px 0; min-width: 2px; }
+.viz-hbar-valor { font-size: .82rem; color: var(--text-primary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.viz-hbar-valor small { color: var(--text-secondary); margin-left: .25rem; }
+
+/* ---------- Medidores (ranking de conductores) ---------- */
+.viz-medidor { padding: .55rem 0; border-radius: 6px; outline-offset: 2px; }
+.viz-medidor + .viz-medidor { border-top: 1px solid var(--card-border); }
+.viz-medidor-cab { display: flex; justify-content: space-between; align-items: baseline; gap: .75rem; margin-bottom: .4rem; }
+.viz-medidor-nombre { font-size: .88rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.viz-medidor-pos { color: var(--text-secondary); font-variant-numeric: tabular-nums; margin-right: .5rem; }
+.viz-medidor-valor { font-size: .85rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.viz-medidor-valor small { color: var(--text-secondary); margin-left: .3rem; }
+.viz-medidor-pista { height: 8px; background: var(--viz-pista); border-radius: 8px; overflow: hidden; }
+.viz-medidor-barra { height: 100%; background: var(--viz-serie-1); border-radius: 8px; }
+.viz-medidor:hover .viz-medidor-barra, .viz-medidor:focus-visible .viz-medidor-barra { filter: brightness(1.2); }
+
+/* ---------- Columnas (evolución en el tiempo) ---------- */
+.viz-cols { display: grid; grid-template-columns: auto 1fr; grid-template-rows: 200px auto; column-gap: .5rem; margin-top: 1rem; }
+.viz-cols-eje { position: relative; min-width: 1.6rem; }
+.viz-cols-eje span { position: absolute; right: 0; transform: translateY(50%); font-size: .72rem; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.viz-cols-plot { position: relative; display: flex; align-items: flex-end; border-bottom: 1px solid var(--viz-base); }
+.viz-cols-grilla { position: absolute; left: 0; right: 0; height: 1px; background: var(--viz-grilla); pointer-events: none; }
+.viz-col {
+    position: relative;
+    flex: 1 1 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    outline-offset: -2px;
+    cursor: default;
+}
+.viz-col-barra { width: 60%; max-width: 24px; min-height: 0; background: var(--viz-serie-1); border-radius: 4px 4px 0 0; }
+.viz-col:hover, .viz-col:focus-visible { background: rgba(255, 255, 255, .03); }
+.viz-col:hover .viz-col-barra, .viz-col:focus-visible .viz-col-barra { filter: brightness(1.2); }
+.viz-col-rotulo { font-size: .72rem; color: var(--text-primary); margin-bottom: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.viz-cols-x { grid-column: 2; display: flex; }
+.viz-cols-x span { flex: 1 1 0; text-align: center; font-size: .7rem; color: var(--text-secondary); padding-top: .35rem; white-space: nowrap; overflow: visible; min-width: 0; }
+
+/* ---------- Tabla equivalente (accesibilidad) ---------- */
+.viz-tabla { margin-top: .9rem; }
+.viz-tabla summary { font-size: .8rem; color: var(--text-secondary); cursor: pointer; width: max-content; }
+.viz-tabla summary:hover { color: var(--text-primary); }
+.viz-tabla table { margin-top: .5rem; }
+.viz-tabla td, .viz-tabla th { padding: .35rem .75rem !important; font-size: .8rem !important; }
+
+/* ---------- Línea de tiempo (últimos viajes) ---------- */
+.viz-linea-tiempo { list-style: none; margin: 0; padding: 0; }
+.viz-linea-tiempo li { position: relative; padding: 0 0 1rem 1.6rem; }
+.viz-linea-tiempo li::before { content: ''; position: absolute; left: 5px; top: 14px; bottom: -2px; width: 1px; background: var(--card-border); }
+.viz-linea-tiempo li:last-child { padding-bottom: 0; }
+.viz-linea-tiempo li:last-child::before { display: none; }
+.viz-punto { position: absolute; left: 0; top: 4px; width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 2px var(--card-bg); }
+
+/* ---------- Tooltip ---------- */
+.viz-tooltip {
+    position: fixed;
+    z-index: 2000;
+    pointer-events: none;
+    background: #0b0f14;
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: .45rem .65rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+    opacity: 0;
+    transition: opacity .1s;
+    max-width: 260px;
+}
+.viz-tooltip strong { display: block; font-size: .9rem; color: var(--text-primary); }
+.viz-tooltip span { display: block; font-size: .75rem; color: var(--text-secondary); }
+
+@media (max-width: 575.98px) {
+    .viz-spark { max-width: 42%; height: auto; }
+    .viz-cols-x span.alterno { visibility: hidden; }
+    .viz-tile { padding: .85rem 1rem; }
+}

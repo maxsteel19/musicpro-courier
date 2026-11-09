@@ -35,7 +35,7 @@
 </div>
 
 <div class="row g-3">
-    <div class="{% if resultado.grafico %}col-xl-7{% else %}col-12{% endif %}">
+    <div class="{% if grafico %}col-xl-7{% else %}col-12{% endif %}">
         <div class="card-dark h-100">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <span><i class="fas fa-table me-2" style="color:var(--info);"></i>Resultado</span>
@@ -60,11 +60,21 @@
             {% endif %}
         </div>
     </div>
-    {% if resultado.grafico %}
+    {% if grafico %}
     <div class="col-xl-5">
         <div class="card-dark h-100">
-            <div class="card-header"><i class="fas fa-chart-pie me-2" style="color:var(--warning);"></i>Gráfico</div>
-            <div class="card-body"><canvas id="graficoReporte" height="260" aria-label="Gráfico del reporte"></canvas></div>
+            <div class="card-header"><i class="fas fa-chart-simple me-2" style="color:var(--warning);"></i>Gráfico</div>
+            <div class="card-body">
+                {% if grafico.tipo == 'segmentos' %}
+                    <div class="viz-cifra">{{ grafico.total_txt }} <span class="fs-6 fw-normal text-muted-custom">viajes</span></div>
+                    {% include "includes/graficos/segmentos.html" with g=grafico unidad="viajes" %}
+                {% elif grafico.tipo == 'columnas' %}
+                    <div class="viz-cifra">{{ grafico.total_txt }} <span class="fs-6 fw-normal text-muted-custom">viajes · promedio {{ grafico.promedio_txt }} por mes</span></div>
+                    {% include "includes/graficos/columnas.html" with g=grafico %}
+                {% else %}
+                    {% include "includes/graficos/barras.html" with g=grafico unidad="viajes" %}
+                {% endif %}
+            </div>
         </div>
     </div>
     {% endif %}
@@ -84,19 +94,8 @@
         </div>
     </div>
 </div>
-{% if resultado.grafico %}{{ resultado.grafico|json_script:"datos-grafico" }}{% endif %}
 {% endblock %}
 
 {% block extra_js %}
-{% if resultado.grafico %}
-<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}"></script>
-<script src="{% static 'js/graficos.js' %}"></script>
-<script>
-    (function () {
-        const datos = leerDatos('datos-grafico');
-        const tipos = { doughnut: graficoDona, bar: graficoBarras, line: graficoLinea };
-        (tipos[datos.tipo] || graficoBarras)('graficoReporte', datos);
-    })();
-</script>
-{% endif %}
+{% if grafico %}<script src="{% static 'js/graficos.js' %}"></script>{% endif %}
 {% endblock %}

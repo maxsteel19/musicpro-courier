@@ -1,0 +1,24 @@
+{% load l10n %}{% localize off %}
+{# Barras horizontales ordenadas. Variables: g (graficos.barras_ranking), unidad #}
+<div role="list">
+    {% for f in g.filas %}
+    <div class="viz-hbar" role="listitem" tabindex="0"
+         data-tip-valor="{{ f.valor_txt }} {{ unidad|default:'registros' }} · {{ f.cuota_txt }}" data-tip-etiqueta="{{ f.etiqueta }}">
+        <span class="viz-hbar-etq" title="{{ f.etiqueta }}">{{ f.etiqueta }}</span>
+        <div class="viz-hbar-area">
+            <div class="viz-hbar-barra" style="width: calc({{ f.ancho }}% * 0.82);"></div>
+            <span class="viz-hbar-valor">{{ f.valor_txt }}</span>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted-custom small mb-0">Sin datos en el período.</p>
+    {% endfor %}
+</div>
+<details class="viz-tabla">
+    <summary>Ver como tabla</summary>
+    <table class="table table-dark-custom">
+        <thead><tr><th>Categoría</th><th class="text-end">Cantidad</th><th class="text-end">%</th></tr></thead>
+        <tbody>{% for f in g.filas %}<tr><td>{{ f.etiqueta }}</td><td class="text-end">{{ f.valor_txt }}</td><td class="text-end">{{ f.cuota_txt }}</td></tr>{% endfor %}</tbody>
+    </table>
+</details>
+{% endlocalize %}

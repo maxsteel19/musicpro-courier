@@ -10,6 +10,7 @@ from django.shortcuts import render
 from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
+from .. import graficos
 from ..forms import ParametrosReporteForm
 from ..models import Conductor, TipoVehiculo, Vehiculo, Viaje
 from ..reportes import REPORTES
@@ -94,6 +95,7 @@ def reporte_detalle(request, numero):
         'form': form,
         'campos_visibles': [form[nombre] for nombre in campos_visibles],
         'resultado': resultado,
+        'grafico': graficos.desde_resultado(resultado.grafico) if resultado else None,
         'codigo': inspect.getsource(reporte.funcion),
         'consultas': consultas,
         'anios': _anios_disponibles(),
