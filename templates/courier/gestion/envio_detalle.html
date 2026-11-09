@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load humanize_cl %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <a href="{% url 'courier:envio_lista' %}" class="btn btn-outline-custom btn-sm"><i class="fas fa-arrow-left me-1"></i>Volver a envíos</a>
+    <div class="d-flex gap-2">
+        <a href="{% url 'courier:incidencia_crear' %}" class="btn btn-outline-custom btn-sm"><i class="fas fa-triangle-exclamation me-1"></i>Registrar incidencia</a>
+        <a href="{% url 'courier:envio_editar' envio.pk %}" class="btn btn-primary-custom btn-sm"><i class="fas fa-pen me-1"></i>Editar</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-8">
+        <div class="card-dark h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-truck-fast me-2" style="color:var(--primary);"></i>{{ envio.numero_envio }}</span>
+                <span class="badge-estado badge-{{ envio.estado }}">{{ envio.get_estado_display }}</span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div><div class="kpi-label">Origen</div><div class="fw-semibold">{{ envio.sucursal_origen.nombre }}</div><small class="text-muted-custom">{{ envio.sucursal_origen.ciudad }}</small></div>
+                    <i class="fas fa-arrow-right-long fa-2x text-muted-custom"></i>
+                    <div class="text-end"><div class="kpi-label">Destino</div><div class="fw-semibold">{{ envio.sucursal_destino.nombre }}</div><small class="text-muted-custom">{{ envio.sucursal_destino.ciudad }}</small></div>
+                </div>
+                <div class="progress my-3" style="height:12px;"><div class="progress-bar" style="width:{{ envio.progreso }}%"></div></div>
+                <p class="text-center text-muted-custom small mb-4">Progreso: {{ envio.progreso }}%</p>
+                <div class="row g-3 small">
+                    <div class="col-sm-4"><div class="kpi-label">Despacho</div>{{ envio.fecha_despacho|date:"d/m/Y H:i"|default:"—" }}</div>
+                    <div class="col-sm-4"><div class="kpi-label">Entrega estimada</div>{{ envio.fecha_entrega_estimada|date:"d/m/Y H:i"|default:"—" }}</div>
+                    <div class="col-sm-4"><div class="kpi-label">Entrega real</div>{{ envio.fecha_entrega_real|date:"d/m/Y H:i"|default:"—" }}</div>
+                    <div class="col-sm-4"><div class="kpi-label">Prioridad</div><span class="badge-estado badge-{{ envio.prioridad }}">{{ envio.get_prioridad_display }}</span></div>
+                    <div class="col-sm-4"><div class="kpi-label">Registrado por</div>{{ envio.creado_por.username|default:"—" }}</div>
+                    <div class="col-12"><div class="kpi-label">Observaciones</div>{{ envio.observaciones|default:"Sin observaciones"|linebreaksbr }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-dark mb-3">
+            <div class="card-header"><i class="fas fa-box me-2" style="color:var(--warning);"></i>Paquete</div>
+            <div class="card-body small">
+                <div class="fw-semibold mb-1">{{ envio.paquete.codigo }}</div>
+                <div class="mb-2">{{ envio.paquete.descripcion }}</div>
+                <div class="d-flex justify-content-between"><span class="text-muted-custom">Peso</span><span>{{ envio.paquete.peso }} kg</span></div>
+                <div class="d-flex justify-content-between"><span class="text-muted-custom">Volumen</span><span>{{ envio.paquete.volumen }} m³</span></div>
+                <div class="d-flex justify-content-between"><span class="text-muted-custom">Valor declarado</span><span>{{ envio.paquete.valor_declarado|clp }}</span></div>
+            </div>
+        </div>
+        <div class="card-dark">
+            <div class="card-header"><i class="fas fa-route me-2" style="color:var(--info);"></i>Viaje asignado</div>
+            <div class="card-body small">
+                {% if envio.viaje %}
+                <a href="{% url 'courier:viaje_detalle' envio.viaje.pk %}" class="fw-semibold text-decoration-none">{{ envio.viaje.codigo }}</a>
+                <span class="badge-estado badge-{{ envio.viaje.estado }} ms-1">{{ envio.viaje.get_estado_display }}</span>
+                <div class="mt-2 d-flex justify-content-between"><span class="text-muted-custom">Vehículo</span><span>{{ envio.viaje.vehiculo.patente }} ({{ envio.viaje.vehiculo.tipo_vehiculo }})</span></div>
+                <div class="d-flex justify-content-between"><span class="text-muted-custom">Conductor</span><span>{{ envio.viaje.conductor.nombre }}</span></div>
+                <div class="d-flex justify-content-between"><span class="text-muted-custom">Salida</span><span>{{ envio.viaje.fecha_salida|date:"d/m/Y H:i" }}</span></div>
+                {% else %}
+                <span class="text-muted-custom">Este envío aún no tiene viaje asignado.</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card-dark h-100">
+            <div class="card-header"><i class="fas fa-triangle-exclamation me-2" style="color:var(--danger);"></i>Incidencias</div>
+            <ul class="list-group list-group-flush">
+                {% for i in incidencias %}
+                <li class="list-group-item bg-transparent text-light border-secondary small">
+                    <div class="d-flex justify-content-between"><strong>{{ i.get_tipo_display }}</strong>{% if i.resuelta %}<span class="badge-estado estado-ok">Resuelta</span>{% else %}<span class="badge-estado estado-bad">Abierta</span>{% endif %}</div>
+                    <div>{{ i.descripcion }}</div>
+                    <small class="text-muted-custom">{{ i.fecha|date:"d/m/Y H:i" }}{% if i.reportada_por %} · {{ i.reportada_por.username }}{% endif %}</small>
+                </li>
+                {% empty %}<li class="list-group-item bg-transparent text-muted-custom border-0 small">Sin incidencias.</li>{% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card-dark h-100">
+            <div class="card-header"><i class="fas fa-bell me-2" style="color:var(--info);"></i>Notificaciones</div>
+            <ul class="list-group list-group-flush">
+                {% for n in notificaciones %}
+                <li class="list-group-item bg-transparent text-light border-secondary small">
+                    <div class="d-flex justify-content-between"><strong>{{ n.get_canal_display }}</strong>{% if n.enviada %}<span class="badge-estado estado-ok">Enviada</span>{% else %}<span class="badge-estado estado-warn">Pendiente</span>{% endif %}</div>
+                    <div>{{ n.mensaje }}</div>
+                    <small class="text-muted-custom">{{ n.fecha_envio|date:"d/m/Y H:i" }}</small>
+                </li>
+                {% empty %}<li class="list-group-item bg-transparent text-muted-custom border-0 small">Sin notificaciones.</li>{% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

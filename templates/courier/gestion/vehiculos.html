@@ -1,0 +1,38 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}Patente, marca o modelo{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="tipo">Tipo</label>
+    <select name="tipo" id="tipo" class="form-select">
+        <option value="">Todos</option>
+        {% for t in tipos %}<option value="{{ t.pk }}" {% if tipo == t.pk|stringformat:'s' %}selected{% endif %}>{{ t.nombre }}</option>{% endfor %}
+    </select>
+</div>
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="disponible">Disponibilidad</label>
+    <select name="disponible" id="disponible" class="form-select">
+        <option value="">Todas</option>
+        <option value="si" {% if disponible == 'si' %}selected{% endif %}>Disponibles</option>
+        <option value="no" {% if disponible == 'no' %}selected{% endif %}>No disponibles</option>
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:vehiculo_crear' %}{% endblock %}
+{% block texto_nuevo %}Nuevo vehículo{% endblock %}
+{% block columnas %}<th>Patente</th><th>Tipo</th><th>Marca / modelo</th><th class="text-center">Año</th><th class="text-center">Viajes</th><th>Estado</th><th>Disponible</th>{% endblock %}
+{% block filas %}
+{% for v in pagina %}
+<tr>
+    <td class="fw-semibold" style="letter-spacing:.05em;">{{ v.patente }}</td>
+    <td>{{ v.tipo_vehiculo.nombre }}</td>
+    <td>{{ v.marca }} {{ v.modelo }}</td>
+    <td class="text-center">{{ v.anio }}</td>
+    <td class="text-center">{{ v.total_viajes }}</td>
+    <td><span class="badge-estado badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
+    <td>{% if v.disponible %}<i class="fas fa-circle-check" style="color:var(--success);"></i> Sí{% else %}<i class="fas fa-circle-xmark" style="color:var(--danger);"></i> No{% endif %}</td>
+    <td>{% url 'courier:vehiculo_editar' v.pk as u_editar %}{% url 'courier:vehiculo_eliminar' v.pk as u_eliminar %}{% include "includes/acciones.html" with editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="8"><div class="empty-state"><i class="fas fa-truck"></i>No hay vehículos que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}

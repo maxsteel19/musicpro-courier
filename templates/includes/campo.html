@@ -1,0 +1,14 @@
+{# Renderiza un campo de formulario con etiqueta, ayuda y errores. #}
+{% if campo.field.widget.input_type == 'checkbox' %}
+<div class="form-check form-switch mt-md-4 pt-md-2">
+    {{ campo }}
+    <label class="form-check-label" for="{{ campo.id_for_label }}">{{ campo.label }}</label>
+    {% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
+    {% for error in campo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+</div>
+{% else %}
+<label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span style="color:var(--primary);">*</span>{% endif %}</label>
+{{ campo }}
+{% if campo.help_text %}<div class="form-text">{{ campo.help_text|safe }}</div>{% endif %}
+{% for error in campo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+{% endif %}

@@ -1,0 +1,17 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}Nombre del tipo{% endblock %}
+{% block url_nuevo %}{% url 'courier:tipo_vehiculo_crear' %}{% endblock %}
+{% block texto_nuevo %}Nuevo tipo{% endblock %}
+{% block columnas %}<th>Nombre</th><th>Descripción</th><th class="text-center">Vehículos</th>{% endblock %}
+{% block filas %}
+{% for t in pagina %}
+<tr>
+    <td class="fw-semibold">{{ t.nombre }}</td>
+    <td><small class="text-muted-custom">{{ t.descripcion|default:"—"|truncatechars:90 }}</small></td>
+    <td class="text-center"><a href="{% url 'courier:vehiculo_lista' %}?tipo={{ t.pk }}" class="text-decoration-none">{{ t.total_vehiculos }}</a></td>
+    <td>{% url 'courier:tipo_vehiculo_editar' t.pk as u_editar %}{% url 'courier:tipo_vehiculo_eliminar' t.pk as u_eliminar %}{% include "includes/acciones.html" with editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="4"><div class="empty-state"><i class="fas fa-layer-group"></i>No hay tipos de vehículo registrados.</div></td></tr>
+{% endfor %}
+{% endblock %}

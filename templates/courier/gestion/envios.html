@@ -1,0 +1,37 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}N.º envío, paquete, ciudad destino o conductor{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
+    <select name="estado" id="estado" class="form-select">
+        <option value="">Todos</option>
+        {% for valor, nombre in estados %}<option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+    </select>
+</div>
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="prioridad">Prioridad</label>
+    <select name="prioridad" id="prioridad" class="form-select">
+        <option value="">Todas</option>
+        {% for valor, nombre in prioridades %}<option value="{{ valor }}" {% if prioridad == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:envio_crear' %}{% endblock %}
+{% block texto_nuevo %}Nuevo envío{% endblock %}
+{% block columnas %}<th>N.º envío</th><th>Ruta</th><th>Paquete</th><th>Viaje / conductor</th><th>Prioridad</th><th>Progreso</th><th>Estado</th>{% endblock %}
+{% block filas %}
+{% for e in pagina %}
+<tr>
+    <td class="text-nowrap"><a href="{% url 'courier:envio_detalle' e.pk %}" class="fw-semibold text-decoration-none">{{ e.numero_envio }}</a></td>
+    <td><small>{{ e.sucursal_origen.ciudad }} <i class="fas fa-arrow-right mx-1 text-muted-custom"></i> {{ e.sucursal_destino.ciudad }}</small></td>
+    <td><small>{{ e.paquete.descripcion|truncatechars:32 }}</small></td>
+    <td><small>{% if e.viaje %}{{ e.viaje.codigo }} · {{ e.viaje.vehiculo.patente }}<br><span class="text-muted-custom">{{ e.viaje.conductor.nombre }}</span>{% else %}<span class="text-muted-custom">Sin asignar</span>{% endif %}</small></td>
+    <td><span class="badge-estado badge-{{ e.prioridad }}">{{ e.get_prioridad_display }}</span></td>
+    <td style="min-width:110px;"><div class="progress"><div class="progress-bar" style="width:{{ e.progreso }}%"></div></div><small class="text-muted-custom">{{ e.progreso }}%</small></td>
+    <td><span class="badge-estado badge-{{ e.estado }}">{{ e.get_estado_display }}</span></td>
+    <td>{% url 'courier:envio_detalle' e.pk as u_detalle %}{% url 'courier:envio_editar' e.pk as u_editar %}{% url 'courier:envio_eliminar' e.pk as u_eliminar %}{% include "includes/acciones.html" with detalle=u_detalle editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="8"><div class="empty-state"><i class="fas fa-truck-fast"></i>No hay envíos que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}

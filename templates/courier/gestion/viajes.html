@@ -1,0 +1,31 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}Origen, destino, patente o conductor{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
+    <select name="estado" id="estado" class="form-select">
+        <option value="">Todos</option>
+        {% for valor, nombre in estados %}<option value="{{ valor }}" {% if estado == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:viaje_crear' %}{% endblock %}
+{% block texto_nuevo %}Nuevo viaje{% endblock %}
+{% block columnas %}<th>N.º</th><th>Vehículo</th><th>Conductor</th><th>Ruta</th><th>Salida</th><th>Llegada</th><th class="text-center">Envíos</th><th>Estado</th>{% endblock %}
+{% block filas %}
+{% for v in pagina %}
+<tr>
+    <td class="text-nowrap"><a href="{% url 'courier:viaje_detalle' v.pk %}" class="fw-semibold text-decoration-none">{{ v.codigo }}</a></td>
+    <td><small>{{ v.vehiculo.patente }}<br><span class="text-muted-custom">{{ v.vehiculo.tipo_vehiculo.nombre }}</span></small></td>
+    <td>{{ v.conductor.nombre }}</td>
+    <td><small>{{ v.origen }} <i class="fas fa-arrow-right mx-1 text-muted-custom"></i> {{ v.destino }}</small></td>
+    <td class="text-nowrap"><small>{{ v.fecha_salida|date:"d/m/Y H:i" }}</small></td>
+    <td class="text-nowrap"><small>{{ v.fecha_llegada|date:"d/m/Y H:i"|default:"—" }}</small></td>
+    <td class="text-center">{{ v.total_envios }}</td>
+    <td><span class="badge-estado badge-{{ v.estado }}">{{ v.get_estado_display }}</span></td>
+    <td>{% url 'courier:viaje_detalle' v.pk as u_detalle %}{% url 'courier:viaje_editar' v.pk as u_editar %}{% url 'courier:viaje_eliminar' v.pk as u_eliminar %}{% include "includes/acciones.html" with detalle=u_detalle editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="9"><div class="empty-state"><i class="fas fa-route"></i>No hay viajes que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}

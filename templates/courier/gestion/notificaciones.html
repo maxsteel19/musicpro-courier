@@ -1,0 +1,28 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}N.º envío o mensaje{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="canal">Canal</label>
+    <select name="canal" id="canal" class="form-select">
+        <option value="">Todos</option>
+        {% for valor, nombre in canales %}<option value="{{ valor }}" {% if canal == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:notificacion_crear' %}{% endblock %}
+{% block texto_nuevo %}Nueva notificación{% endblock %}
+{% block columnas %}<th>Envío</th><th>Canal</th><th>Mensaje</th><th>Fecha</th><th>Estado</th>{% endblock %}
+{% block filas %}
+{% for n in pagina %}
+<tr>
+    <td><a href="{% url 'courier:envio_detalle' n.envio_id %}" class="text-decoration-none fw-semibold">{{ n.envio.numero_envio }}</a></td>
+    <td><i class="fas {% if n.canal == 'email' %}fa-envelope{% elif n.canal == 'sms' %}fa-comment-sms{% else %}fa-mobile-screen{% endif %} me-1 text-muted-custom"></i>{{ n.get_canal_display }}</td>
+    <td><small>{{ n.mensaje|truncatechars:70 }}</small></td>
+    <td><small>{{ n.fecha_envio|date:"d/m/Y H:i" }}</small></td>
+    <td>{% if n.enviada %}<span class="badge-estado estado-ok">Enviada</span>{% else %}<span class="badge-estado estado-warn">Pendiente</span>{% endif %}</td>
+    <td>{% url 'courier:notificacion_editar' n.pk as u_editar %}{% url 'courier:notificacion_eliminar' n.pk as u_eliminar %}{% include "includes/acciones.html" with editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="6"><div class="empty-state"><i class="fas fa-bell-slash"></i>No hay notificaciones que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}

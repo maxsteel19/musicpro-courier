@@ -1,0 +1,37 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}N.º envío o descripción{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="tipo">Tipo</label>
+    <select name="tipo" id="tipo" class="form-select">
+        <option value="">Todos</option>
+        {% for valor, nombre in tipos %}<option value="{{ valor }}" {% if tipo == valor %}selected{% endif %}>{{ nombre }}</option>{% endfor %}
+    </select>
+</div>
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
+    <select name="estado" id="estado" class="form-select">
+        <option value="">Todas</option>
+        <option value="abierta" {% if estado == 'abierta' %}selected{% endif %}>Abiertas</option>
+        <option value="resuelta" {% if estado == 'resuelta' %}selected{% endif %}>Resueltas</option>
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:incidencia_crear' %}{% endblock %}
+{% block texto_nuevo %}Nueva incidencia{% endblock %}
+{% block columnas %}<th>Envío</th><th>Tipo</th><th>Descripción</th><th>Fecha</th><th>Reportada por</th><th>Estado</th>{% endblock %}
+{% block filas %}
+{% for i in pagina %}
+<tr>
+    <td><a href="{% url 'courier:envio_detalle' i.envio_id %}" class="text-decoration-none fw-semibold">{{ i.envio.numero_envio }}</a></td>
+    <td>{{ i.get_tipo_display }}</td>
+    <td><small>{{ i.descripcion|truncatechars:60 }}</small></td>
+    <td><small>{{ i.fecha|date:"d/m/Y H:i" }}</small></td>
+    <td><small>{{ i.reportada_por.username|default:"—" }}</small></td>
+    <td>{% if i.resuelta %}<span class="badge-estado estado-ok">Resuelta</span>{% else %}<span class="badge-estado estado-bad">Abierta</span>{% endif %}</td>
+    <td>{% url 'courier:incidencia_editar' i.pk as u_editar %}{% url 'courier:incidencia_eliminar' i.pk as u_eliminar %}{% include "includes/acciones.html" with editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="7"><div class="empty-state"><i class="fas fa-circle-check"></i>No hay incidencias que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}

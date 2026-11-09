@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card-dark">
+            <div class="card-body text-center p-4">
+                <span class="kpi-icon bg-soft-red mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem;"><i class="fas fa-trash"></i></span>
+                <h2 class="h5 fw-bold">{{ titulo }}</h2>
+                <p class="mb-2">¿Confirma que desea eliminar <strong>"{{ objeto }}"</strong>?</p>
+                {% if advertencia %}<p class="text-muted-custom small">{{ advertencia }}</p>{% endif %}
+                <form method="post" class="d-flex gap-2 justify-content-center mt-4">
+                    {% csrf_token %}
+                    <a href="{% url url_volver %}" class="btn btn-outline-custom">Cancelar</a>
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Sí, eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

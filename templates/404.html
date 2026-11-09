@@ -1,0 +1,12 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Página no encontrada</title>
+<link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+<link href="{% static 'vendor/fontawesome/css/all.min.css' %}" rel="stylesheet">
+<link href="{% static 'css/app.css' %}" rel="stylesheet"></head>
+<body><div class="auth-wrapper"><div class="card-dark text-center p-5" style="max-width:480px;">
+<i class="fas fa-map-location-dot fa-3x mb-3" style="color:var(--warning);"></i>
+<h1 class="h4 fw-bold">Página no encontrada (404)</h1>
+<p class="text-muted-custom">El registro o la página que busca no existe.</p>
+<a href="{% url 'courier:inicio' %}" class="btn btn-primary-custom mt-2">Ir al inicio</a>
+</div></div></body></html>

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="card-dark">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="kpi-icon bg-soft-blue" style="width:36px;height:36px;font-size:1rem;"><i class="fas fa-user-gear"></i></span>
+                {{ titulo }}
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}</div>{% endif %}
+                    <div class="row g-3">
+                        {% for campo in form %}
+                        <div class="col-md-6">{% include "includes/campo.html" %}</div>
+                        {% endfor %}
+                    </div>
+                    {% if es_edicion %}
+                    <p class="small text-muted-custom mt-3 mb-0"><i class="fas fa-key me-1"></i>Para cambiar la contraseña use <a href="{% url 'courier:usuario_password' usuario_obj.pk %}">Cambiar contraseña</a>.</p>
+                    {% endif %}
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <a href="{% url 'courier:usuario_lista' %}" class="btn btn-outline-custom">Cancelar</a>
+                        <button type="submit" class="btn btn-primary-custom"><i class="fas fa-floppy-disk me-1"></i>{% if es_edicion %}Guardar cambios{% else %}Crear usuario{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

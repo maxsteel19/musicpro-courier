@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-dark mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-12 col-md">
+                <label class="form-label small text-muted-custom mb-1" for="q">Buscar</label>
+                <input type="search" class="form-control" id="q" name="q" value="{{ q }}" placeholder="Usuario, nombre o correo">
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small text-muted-custom mb-1" for="rol">Rol</label>
+                <select name="rol" id="rol" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="admin" {% if rol == 'admin' %}selected{% endif %}>Administradores</option>
+                    <option value="operador" {% if rol == 'operador' %}selected{% endif %}>Operadores</option>
+                </select>
+            </div>
+            <div class="col-6 col-md-2">
+                <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="activo" {% if estado == 'activo' %}selected{% endif %}>Activos</option>
+                    <option value="inactivo" {% if estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-custom"><i class="fas fa-filter me-1"></i>Filtrar</button>
+                {% if request.GET %}<a href="{{ request.path }}" class="btn btn-link text-muted-custom">Limpiar</a>{% endif %}
+            </div>
+            <div class="col-12 col-md-auto ms-md-auto">
+                <a href="{% url 'courier:usuario_crear' %}" class="btn btn-primary-custom w-100"><i class="fas fa-user-plus me-1"></i>Nuevo usuario</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card-dark">
+    <div class="table-responsive">
+        <table class="table table-dark-custom table-hover">
+            <thead><tr><th>Usuario</th><th>Nombre</th><th>Correo</th><th>Rol</th><th>Último acceso</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+            <tbody>
+            {% for u in pagina %}
+            <tr>
+                <td class="fw-semibold">{{ u.username }}{% if u.pk == user.pk %} <span class="badge text-bg-secondary">Usted</span>{% endif %}</td>
+                <td>{{ u.get_full_name|default:"—" }}</td>
+                <td><small>{{ u.email|default:"—" }}</small></td>
+                <td>{% if u.is_superuser %}<span class="badge-estado bg-soft-purple">Superusuario</span>{% elif u.is_staff %}<span class="badge-estado estado-info">Administrador</span>{% else %}<span class="badge-estado badge-baja">Operador</span>{% endif %}</td>
+                <td><small>{{ u.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</small></td>
+                <td>{% if u.is_active %}<span class="badge-estado estado-ok">Activo</span>{% else %}<span class="badge-estado estado-bad">Inactivo</span>{% endif %}</td>
+                <td>
+                    <div class="d-flex gap-1 justify-content-end">
+                        <a href="{% url 'courier:usuario_editar' u.pk %}" class="btn btn-outline-custom btn-icon" title="Editar"><i class="fas fa-pen"></i></a>
+                        <a href="{% url 'courier:usuario_password' u.pk %}" class="btn btn-outline-custom btn-icon" title="Cambiar contraseña"><i class="fas fa-key"></i></a>
+                        {% if u.pk != user.pk %}
+                        <form method="post" action="{% url 'courier:usuario_cambiar_estado' u.pk %}" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-custom btn-icon" title="{% if u.is_active %}Desactivar{% else %}Activar{% endif %}">
+                                <i class="fas {% if u.is_active %}fa-user-lock{% else %}fa-user-check{% endif %}"></i>
+                            </button>
+                        </form>
+                        <a href="{% url 'courier:usuario_eliminar' u.pk %}" class="btn btn-outline-custom btn-icon" title="Eliminar"><i class="fas fa-trash"></i></a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7"><div class="empty-state"><i class="fas fa-users"></i>No hay usuarios que coincidan.</div></td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% include "includes/paginacion.html" %}
+{% endblock %}

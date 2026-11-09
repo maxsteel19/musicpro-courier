@@ -1,0 +1,331 @@
+/* Music Pro Courier - estilos del administrador propio */
+:root {
+    --primary: #e63946;
+    --primary-dark: #c1121f;
+    --secondary: #1d3557;
+    --accent: #457b9d;
+    --bg: #010409;
+    --surface: #0d1117;
+    --card-bg: #161b22;
+    --card-border: #30363d;
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --success: #2ea043;
+    --warning: #d29922;
+    --info: #58a6ff;
+    --danger: #f85149;
+    --sidebar-width: 250px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    margin: 0;
+}
+
+a { color: var(--info); }
+a:hover { color: #79c0ff; }
+
+/* ---------- Layout con barra lateral ---------- */
+.app-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #0b1a30 0%, var(--surface) 100%);
+    border-right: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    z-index: 1030;
+    overflow-y: auto;
+    transition: transform .25s ease;
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+.app-brand:hover { color: var(--text-primary); }
+.app-brand-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.app-brand-title { font-weight: 700; line-height: 1.1; }
+.app-brand-sub { font-size: .72rem; color: var(--text-secondary); }
+
+.app-nav { padding: .75rem .75rem 1.5rem; }
+.app-nav-section {
+    font-size: .7rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--text-secondary);
+    padding: 1rem .75rem .35rem;
+}
+.app-nav a {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    padding: .55rem .75rem;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: .92rem;
+    font-weight: 500;
+}
+.app-nav a i { width: 18px; text-align: center; }
+.app-nav a:hover { background: rgba(255, 255, 255, .05); color: var(--text-primary); }
+.app-nav a.active { background: var(--primary); color: #fff; }
+
+.app-main {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background: rgba(13, 17, 23, .92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--card-border);
+    padding: .7rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.app-topbar h1 { font-size: 1.25rem; font-weight: 700; margin: 0; }
+
+.app-content { padding: 1.5rem; flex: 1; }
+
+.app-footer {
+    border-top: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-size: .8rem;
+    padding: 1rem 1.5rem;
+}
+
+.sidebar-toggle { display: none; }
+
+@media (max-width: 991.98px) {
+    .app-sidebar { transform: translateX(-100%); }
+    .app-sidebar.open { transform: translateX(0); box-shadow: 0 0 40px rgba(0, 0, 0, .6); }
+    .app-main { margin-left: 0; }
+    .sidebar-toggle { display: inline-flex; }
+    .app-content { padding: 1rem; }
+    .app-topbar { padding: .6rem 1rem; }
+}
+
+/* ---------- Tarjetas y KPIs ---------- */
+.card-dark {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+}
+.card-dark .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--card-border);
+    font-weight: 600;
+    padding: .9rem 1.25rem;
+}
+.card-dark .card-body { padding: 1.25rem; }
+
+.kpi {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.25rem;
+}
+.kpi-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+.kpi-label { color: var(--text-secondary); font-size: .82rem; }
+.kpi-value { font-size: 1.6rem; font-weight: 700; line-height: 1.1; }
+.kpi-sub { color: var(--text-secondary); font-size: .75rem; }
+
+.bg-soft-red { background: rgba(230, 57, 70, .15); color: var(--primary); }
+.bg-soft-blue { background: rgba(88, 166, 255, .15); color: var(--info); }
+.bg-soft-green { background: rgba(46, 160, 67, .15); color: var(--success); }
+.bg-soft-yellow { background: rgba(210, 153, 34, .15); color: var(--warning); }
+.bg-soft-purple { background: rgba(163, 113, 247, .15); color: #a371f7; }
+
+.text-muted-custom { color: var(--text-secondary) !important; }
+
+/* ---------- Tablas ---------- */
+.table-dark-custom {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--text-primary);
+    --bs-table-hover-bg: rgba(255, 255, 255, .03);
+    --bs-table-hover-color: var(--text-primary);
+    margin: 0;
+}
+.table-dark-custom thead th {
+    background: rgba(255, 255, 255, .04);
+    border-bottom: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: .8rem;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    white-space: nowrap;
+    padding: .75rem 1rem;
+}
+.table-dark-custom td {
+    border-bottom: 1px solid var(--card-border);
+    font-size: .9rem;
+    padding: .7rem 1rem;
+    vertical-align: middle;
+}
+.table-dark-custom tbody tr:last-child td { border-bottom: none; }
+
+/* ---------- Badges de estado ---------- */
+.badge-estado {
+    display: inline-block;
+    padding: .3rem .7rem;
+    border-radius: 20px;
+    font-size: .74rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.estado-ok, .badge-entregado, .badge-finalizado, .badge-operativo, .badge-activo {
+    background: rgba(46, 160, 67, .18); color: #3fb950;
+}
+.estado-info, .badge-en_ruta, .badge-en_curso, .badge-transito, .badge-despachado {
+    background: rgba(88, 166, 255, .18); color: var(--info);
+}
+.estado-warn, .badge-pendiente, .badge-programado, .badge-preparacion, .badge-mantencion {
+    background: rgba(210, 153, 34, .18); color: #e3b341;
+}
+.estado-bad, .badge-cancelado, .badge-devuelto, .badge-fuera_servicio, .badge-inactivo {
+    background: rgba(248, 81, 73, .18); color: var(--danger);
+}
+.badge-urgente { background: rgba(248, 81, 73, .18); color: var(--danger); }
+.badge-alta { background: rgba(219, 109, 40, .2); color: #f0883e; }
+.badge-media { background: rgba(88, 166, 255, .18); color: var(--info); }
+.badge-baja { background: rgba(139, 148, 158, .18); color: var(--text-secondary); }
+
+/* ---------- Botones ---------- */
+.btn-primary-custom {
+    background: var(--primary);
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+}
+.btn-primary-custom:hover, .btn-primary-custom:focus { background: var(--primary-dark); color: #fff; }
+.btn-outline-custom {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+    border-radius: 8px;
+}
+.btn-outline-custom:hover { border-color: var(--primary); color: var(--primary); }
+.btn-icon {
+    width: 32px; height: 32px;
+    padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+}
+
+/* ---------- Formularios ---------- */
+.form-control, .form-select {
+    background-color: var(--surface);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+}
+.form-control:focus, .form-select:focus {
+    background-color: var(--surface);
+    color: var(--text-primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 .2rem rgba(230, 57, 70, .2);
+}
+.form-control::placeholder { color: #6e7681; }
+.form-control:disabled, .form-check-input:disabled { opacity: .6; }
+.form-control[aria-invalid="true"], .form-select[aria-invalid="true"] { border-color: var(--danger); }
+.form-label { font-weight: 500; font-size: .9rem; }
+.form-text { color: var(--text-secondary); }
+.form-check-input { background-color: var(--surface); border-color: var(--card-border); }
+.form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+.invalid-feedback { color: #ff7b72; }
+
+/* ---------- Paginación ---------- */
+.pagination .page-link {
+    background: var(--card-bg);
+    border-color: var(--card-border);
+    color: var(--text-secondary);
+}
+.pagination .page-item.active .page-link { background: var(--primary); border-color: var(--primary); color: #fff; }
+.pagination .page-item.disabled .page-link { background: var(--surface); color: #484f58; }
+
+/* ---------- Varios ---------- */
+.progress { background: var(--surface); height: 8px; }
+.progress-bar { background: linear-gradient(90deg, var(--primary), #ff6b6b); }
+
+.codigo-orm {
+    background: #0b0f14;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 1rem;
+    color: #c9d1d9;
+    font-size: .82rem;
+    max-height: 420px;
+    overflow: auto;
+    white-space: pre;
+}
+
+.nivel-basico { color: #3fb950; }
+.nivel-intermedio { color: var(--info); }
+.nivel-avanzado { color: #e3b341; }
+.nivel-analisis { color: #a371f7; }
+
+.reporte-card { transition: border-color .2s, transform .2s; text-decoration: none; display: block; }
+.reporte-card:hover { border-color: var(--primary); transform: translateY(-2px); }
+
+.alert { border-radius: 10px; }
+
+.empty-state { color: var(--text-secondary); text-align: center; padding: 2.5rem 1rem; }
+.empty-state i { font-size: 2rem; margin-bottom: .75rem; display: block; opacity: .6; }
+
+/* Login y página pública */
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: radial-gradient(circle at 20% 20%, rgba(230, 57, 70, .18), transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(69, 123, 157, .25), transparent 45%),
+                var(--bg);
+}
+.auth-card { width: 100%; max-width: 420px; }
+
+.hero {
+    padding: 5rem 0 4rem;
+    background: radial-gradient(circle at 15% 30%, rgba(230, 57, 70, .2), transparent 40%),
+                linear-gradient(135deg, var(--secondary) 0%, var(--surface) 70%);
+    border-bottom: 1px solid var(--card-border);
+}
+.navbar-public {
+    background: rgba(13, 17, 23, .95);
+    border-bottom: 2px solid var(--primary);
+}

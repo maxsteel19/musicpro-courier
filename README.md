@@ -1,263 +1,344 @@
-# Evaluación 2 - Aplicación web con Django Admin
+# Music Pro Courier: Evaluación 3, aplicación web con CRUD
 
-## 1. Descripción general
+Sistema web administrativo hecho en **Django** y **MySQL** para la logística de **Music Pro Tour**. Gestiona los envíos de instrumentos entre sucursales y los recursos de transporte (vehículos, conductores y viajes).
 
-Este proyecto corresponde a la Evaluación 2, en la cual se desarrolla una aplicación web con Django, configurando una base de datos, gestionando su estructura mediante migraciones, modelando entidades y administrándolas desde Django Admin.
+Este proyecto **continúa el caso de la Evaluación 2** (Django Admin). En la Evaluación 3 se reemplazó Django Admin por un **administrador propio**, con autenticación, control de acceso con decoradores, mantenedores CRUD, mantención de usuarios y una página de **reportes construidos con el ORM**.
 
-La solución implementada busca resolver la gestión de operaciones logísticas y de distribución para Music Pro Tour, centrada en sucursales, paquetes, envíos, incidencias y notificaciones.
+> **Proyecto del informe ORM:** _Transporte_ (vehículos, conductores y viajes). Encaja de forma natural en un courier: cada envío viaja en un viaje que tiene un vehículo y un conductor asignados.
 
-## 2. Objetivo
+---
 
-Desarrollar una aplicación backend con Django que permita:
+## 1. Cumplimiento de la pauta
 
-- configurar la conexión a la base de datos,
-- modelar correctamente las entidades y sus relaciones,
-- generar y aplicar migraciones,
-- administrar registros desde el panel de Django Admin,
-- implementar operaciones CRUD,
-- aplicar filtros y búsquedas,
-- cargar datos de prueba para validar el sistema.
+### Parte 1: Sistema web administrativo
 
-## 3. Requisitos evaluados
+| Requisito del docx | Cómo se cumple | Dónde |
+|---|---|---|
+| Conexión con MySQL local | Motor `django.db.backends.mysql` con credenciales leídas desde `.env` | `musicpro/settings.py` |
+| Autenticación (inicio y cierre de sesión) | `LoginView` / `LogoutView` de `django.contrib.auth` con plantillas propias | `courier/views/cuentas.py`, `templates/registration/` |
+| Control de acceso con decoradores | `@login_required` en **todas** las vistas privadas; `@administrador_requerido` para usuarios | `courier/views/*.py`, `courier/decorators.py` |
+| Protección de funcionalidades | Sin sesión, cualquier URL privada redirige al login (también los POST y los JSON) | Tests en `courier/tests/test_autenticacion.py` |
+| Mantención de usuarios | Crear, listar, buscar, editar, cambiar clave, **desactivar/activar** y eliminar | `courier/views/usuarios.py` |
+| Mantención de entidades del caso | CRUD de Sucursales, Paquetes, Envíos, Incidencias, Notificaciones, Tipos de vehículo, Vehículos, Conductores y Viajes | `courier/views/gestion.py` |
+| Uso del ORM | Todas las consultas usan el ORM (`filter`, `annotate`, `aggregate`, `Q`, `F`, `Count`, `Avg`, `Case/When`, subconsultas). **No hay SQL escrito a mano** | `courier/views/`, `courier/reportes.py` |
+| Interfaz web funcional | Panel con menú lateral, listados con búsqueda, filtros y paginación, formularios validados y detalle de envíos y viajes | `templates/` |
+| Persistencia de datos | Cada operación de la interfaz se refleja en MySQL (verificado con tests contra MySQL) | `courier/tests/test_crud.py` |
+| **Sin Django Admin** | `django.contrib.admin` fue retirado de `INSTALLED_APPS` y de las URLs | `musicpro/settings.py`, `musicpro/urls.py` |
 
-### 3.1 Configuración de la base de datos
-La aplicación utiliza SQLite como motor de base de datos y está conectada mediante la configuración de Django en `musicpro/settings.py`.
+### Énfasis de la evaluación: autenticación y seguridad
 
-### 3.2 Modelamiento de datos
-Se implementaron modelos para representar la información principal del sistema:
+| Lo que hay que demostrar | Cómo verlo en la aplicación |
+|---|---|
+| 1. Iniciar sesión correctamente | `/cuentas/login/` → redirige a `/panel/` con un mensaje de bienvenida |
+| 2. Cerrar sesión | Botón **Cerrar sesión** (formulario POST con token CSRF) |
+| 3. Vistas protegidas con decoradores | `@login_required` sobre cada vista; ver `courier/views/gestion.py` |
+| 4. Sin sesión no se entra escribiendo la URL | Abrir `/vehiculos/` en una ventana privada → login con aviso "Debe iniciar sesión" |
+| 5. Tras cerrar sesión se pierde el acceso | Cerrar sesión y presionar "Atrás": la página no sale del caché (cabecera `no-store`) y pide login |
+| 6. La sesión identifica al usuario | **Mi perfil** muestra el usuario de la sesión, la hora de inicio, el acceso anterior y la expiración. Envíos e incidencias guardan qué usuario los registró |
 
-- `Sucursal`
-- `Paquete`
-- `Envio`
-- `Incidencia`
-- `Notificacion`
+### Parte 2: Consultas con Django ORM
 
-Cada uno cuenta con atributos, tipos de datos y relaciones que permiten mantener la integridad de la información.
+La página **Reportes ORM** (`/reportes/`) tiene los **20 reportes** del proyecto Transporte, agrupados por nivel. Así, cualquier selección de 10 consultas que entregue el docente ya está implementada. Cada reporte muestra:
 
-### 3.3 Migraciones
-Las migraciones se gestionan con Django y se encuentran en la carpeta `courier/migrations`. Esto permite llevar el historial de cambios de la estructura de la base de datos.
+- el **resultado** en una tabla (y un gráfico cuando corresponde),
+- el **código ORM** exacto que se ejecutó (se lee desde `courier/reportes.py`),
+- el **SQL que generó Django** a partir de ese código, como evidencia.
 
-### 3.4 Django Admin
-Se registraron los modelos en `courier/admin.py`, permitiendo:
+| N.º | Nivel | Pregunta | Técnica ORM principal |
+|---|---|---|---|
+| 1 | Básico | ¿Cuáles son todos los vehículos registrados? | `select_related`, `order_by` |
+| 2 | Básico | ¿Qué vehículos pertenecen a un tipo seleccionado? | `filter(tipo_vehiculo=...)` |
+| 3 | Básico | ¿Qué vehículos están disponibles? | `filter(disponible=True)` |
+| 4 | Básico | ¿Cuáles son los 10 vehículos más antiguos? | `order_by('anio')[:10]` |
+| 5 | Básico | ¿Cuántos conductores hay registrados? | `aggregate(Count, filter=Q)` |
+| 6 | Intermedio | Viajes de un vehículo específico | `filter(vehiculo=...)` |
+| 7 | Intermedio | Viajes asignados a un conductor | `filter(conductor=...)` |
+| 8 | Intermedio | Viajes por estado | `values_list().annotate(Count)` |
+| 9 | Intermedio | Viajes en un rango de fechas | `fecha_salida__gte / __lt` |
+| 10 | Intermedio | Vehículos sin viajes | `filter(viajes__isnull=True)` |
+| 11 | Intermedio | Top 5 conductores con más viajes | `annotate(Count('viajes'))[:5]` |
+| 12 | Intermedio | Top 5 vehículos con más viajes | `annotate(Count('viajes'))[:5]` |
+| 13 | Avanzado | Viajes por conductor en el último mes | `Count('viajes', filter=Q(...))` |
+| 14 | Avanzado | Tipos de vehículo más usados | `Count('vehiculos__viajes')` |
+| 15 | Avanzado | Viajes por destino | `values('destino').annotate()` |
+| 16 | Avanzado | Conductores sin viajes en un período | `exclude(id__in=subconsulta)` |
+| 17 | Avanzado | Duración promedio de viajes finalizados | `Avg(F('fecha_llegada') - F('fecha_salida'))` |
+| 18 | Análisis | Conductor con más viajes finalizados en el año | `Count(filter=Q(... __year=))` |
+| 19 | Análisis | % finalizados, cancelados y pendientes | `aggregate` + cálculo de porcentajes |
+| 20 | Análisis | Distribución mensual de viajes en un año | Agregación condicional con 12 `Count(filter=Q)` |
 
-- crear registros,
-- consultar información,
-- editar datos,
-- eliminar registros,
-- filtrar por estado y otros criterios,
-- realizar búsquedas rápidas.
+> Los rangos de fechas se calculan en Python con la zona horaria de Chile y se filtran con `__gte` / `__lt`. Así los reportes funcionan aunque MySQL no tenga cargadas las tablas de zonas horarias, que es lo habitual en Windows.
 
-### 3.5 CRUD
-La aplicación permite realizar operaciones básicas de creación, lectura, actualización y eliminación sobre los datos del sistema.
+---
 
-### 3.6 Generación de datos de prueba
-Se incorporó una carga de datos ficticios con Faker para validar la aplicación con registros realistas.
-
-## 4. Diagrama de base de datos
+## 2. Modelo de datos
 
 ```mermaid
 erDiagram
-    SUCURSAL ||--o{ ENVIO : origen
-    SUCURSAL ||--o{ ENVIO : destino
+    SUCURSAL ||--o{ ENVIO : "origen"
+    SUCURSAL ||--o{ ENVIO : "destino"
     PAQUETE ||--o{ ENVIO : incluye
+    VIAJE |o--o{ ENVIO : transporta
+    TIPO_VEHICULO ||--o{ VEHICULO : clasifica
+    VEHICULO ||--o{ VIAJE : realiza
+    CONDUCTOR ||--o{ VIAJE : conduce
     ENVIO ||--o{ INCIDENCIA : registra
     ENVIO ||--o{ NOTIFICACION : genera
+    USUARIO |o--o{ ENVIO : "creado_por"
+    USUARIO |o--o{ INCIDENCIA : "reportada_por"
 
+    TIPO_VEHICULO {
+        bigint id PK
+        varchar nombre UK
+        text descripcion
+    }
+    VEHICULO {
+        bigint id PK
+        bigint tipo_vehiculo_id FK
+        varchar patente UK
+        varchar marca
+        varchar modelo
+        int anio
+        boolean disponible
+        varchar estado
+    }
+    CONDUCTOR {
+        bigint id PK
+        varchar rut UK
+        varchar nombre
+        varchar licencia
+        varchar telefono
+        boolean activo
+    }
+    VIAJE {
+        bigint id PK
+        bigint vehiculo_id FK
+        bigint conductor_id FK
+        varchar origen
+        varchar destino
+        datetime fecha_salida
+        datetime fecha_llegada
+        varchar estado
+        text observaciones
+    }
     SUCURSAL {
-        int id PK
-        string nombre
-        string direccion
-        string ciudad
-        string telefono
-        string email
+        bigint id PK
+        varchar nombre
+        varchar direccion
+        varchar ciudad
+        varchar telefono
+        varchar email
         float latitud
         float longitud
         boolean activa
     }
-
     PAQUETE {
-        int id PK
-        string codigo UK
-        string descripcion
+        bigint id PK
+        varchar codigo UK
+        varchar descripcion
         decimal peso
         decimal volumen
         decimal valor_declarado
-        string estado
-        datetime fecha_creacion
-        datetime fecha_actualizacion
+        varchar estado
     }
-
     ENVIO {
-        int id PK
-        string numero_envio UK
-        int sucursal_origen_id FK
-        int sucursal_destino_id FK
-        int paquete_id FK
-        string estado
-        string prioridad
-        string conductor
-        string patente_vehiculo
+        bigint id PK
+        varchar numero_envio UK
+        bigint sucursal_origen_id FK
+        bigint sucursal_destino_id FK
+        bigint paquete_id FK
+        bigint viaje_id FK
+        varchar estado
+        varchar prioridad
         int progreso
         datetime fecha_despacho
         datetime fecha_entrega_estimada
         datetime fecha_entrega_real
-        text observaciones
+        bigint creado_por_id FK
     }
-
     INCIDENCIA {
-        int id PK
-        int envio_id FK
-        string tipo
+        bigint id PK
+        bigint envio_id FK
+        varchar tipo
         text descripcion
         datetime fecha
         boolean resuelta
+        bigint reportada_por_id FK
     }
-
     NOTIFICACION {
-        int id PK
-        int envio_id FK
-        string canal
+        bigint id PK
+        bigint envio_id FK
+        varchar canal
         text mensaje
         datetime fecha_envio
         boolean enviada
     }
 ```
 
-## 5. Estructura del proyecto
+**Integridad referencial:** las relaciones usan `on_delete=PROTECT`. Si un vehículo, conductor o sucursal tiene registros asociados, no se puede eliminar: la interfaz lo informa y recomienda marcarlo como inactivo.
+
+---
+
+## 3. Estructura del proyecto
 
 ```text
-musicpro/
-    settings.py
-    urls.py
-    wsgi.py
-
+musicpro/                 Configuración del proyecto (settings, urls, wsgi)
 courier/
-    admin.py
-    models.py
-    views.py
-    urls.py
+    models.py             Modelos del courier y del transporte
+    forms.py              ModelForms con validaciones (RUT, patente, fechas)
+    validators.py         Validación de RUT (módulo 11) y patentes chilenas
+    decorators.py         @administrador_requerido
+    middleware.py         Sin caché para usuarios autenticados
+    reportes.py           Las 20 consultas ORM del informe
+    views/
+        publico.py        Página pública
+        cuentas.py        Login, logout y cambio de contraseña
+        panel.py          Dashboard, seguimiento, perfil y JSON
+        gestion.py        CRUD de las 9 entidades
+        usuarios.py       Mantenedor de usuarios
+        reportes.py       Página de reportes (resultado + código + SQL)
+        utils.py          Paginación y helpers de crear/editar/eliminar
+    management/commands/seed_courier.py   Datos de prueba con Faker
     migrations/
-    management/
-        commands/
-            seed_courier.py
-
-templates/
-    courier/
-
-static/
-    css/
-
-manage.py
-README.md
-db.sqlite3
+    tests/                Pruebas automáticas (52)
+templates/                Plantillas (base con menú lateral, CRUD, reportes)
+static/                   CSS, JS y librerías locales (Bootstrap, Font Awesome, Chart.js)
+docs/GUIA_DEFENSA.md      Guía para explicar el proyecto en la defensa
+Ejercicios/               Ejercicios de clase (proyecto independiente)
 ```
 
-## 6. Tecnologías utilizadas
+---
 
-- Python
-- Django
-- SQLite
-- HTML
-- CSS
-- JavaScript
-- Bootstrap
-- Faker
+## 4. Instalación y ejecución (Windows)
 
-## 7. Instalación y ejecución
+### 4.1 Requisitos
 
-### 7.1 Clonar el proyecto
+- Python 3.12 o superior
+- MySQL Server **8.4 o superior** (o MariaDB 10.11+), corriendo en local
+  - Si tiene MySQL 8.0, instale Django 5.2 LTS: `pip install "Django>=5.2,<6.0"`
+
+### 4.2 Clonar e instalar dependencias
 
 ```bash
 git clone https://github.com/maxsteel19/musicpro-courier.git
 cd musicpro-courier
-```
-
-### 7.2 Crear entorno virtual
-
-```bash
 python -m venv env
-```
-
-### 7.3 Activar entorno virtual
-
-Windows:
-
-```bash
 env\Scripts\activate
+pip install -r requirements.txt
 ```
 
-### 7.4 Instalar dependencias
+### 4.3 Crear la base de datos en MySQL
+
+Desde MySQL Workbench o la consola `mysql -u root -p`:
+
+```sql
+CREATE DATABASE musicpro_courier CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- (Opcional, recomendado) usuario propio en vez de root:
+CREATE USER 'musicpro'@'localhost' IDENTIFIED BY 'una-clave-segura';
+GRANT ALL PRIVILEGES ON musicpro_courier.* TO 'musicpro'@'localhost';
+GRANT ALL PRIVILEGES ON test_musicpro_courier.* TO 'musicpro'@'localhost';  -- para los tests
+FLUSH PRIVILEGES;
+```
+
+### 4.4 Configurar las credenciales
+
+Copie `.env.example` como `.env` y complete los datos de su MySQL:
 
 ```bash
-pip install django faker
+copy .env.example .env
 ```
 
-### 7.5 Ejecutar migraciones
+```ini
+DB_ENGINE=mysql
+DB_NAME=musicpro_courier
+DB_USER=musicpro
+DB_PASSWORD=una-clave-segura
+DB_HOST=127.0.0.1
+DB_PORT=3306
+```
+
+El archivo `.env` está en `.gitignore`: las claves nunca se suben a GitHub.
+
+### 4.5 Migrar, cargar datos y crear el administrador
 
 ```bash
 python manage.py migrate
-```
-
-### 7.6 Iniciar el servidor
-
-```bash
+python manage.py seed_courier
+python manage.py createsuperuser
 python manage.py runserver
 ```
 
-### 7.7 Acceder a la aplicación
+- Sitio público: http://127.0.0.1:8000/
+- Login: http://127.0.0.1:8000/cuentas/login/
+- Panel: http://127.0.0.1:8000/panel/
 
-```text
-http://127.0.0.1:8000/
-```
+`seed_courier` carga 8 sucursales, 5 tipos de vehículo, 22 vehículos, 16 conductores, unos 225 viajes repartidos en los últimos 14 meses, 90 paquetes, 90 envíos, incidencias y notificaciones. Use `python manage.py seed_courier --limpiar` para regenerarlos.
 
-## 8. Administración del sistema
+### 4.6 Roles
 
-Se puede crear un usuario administrador con:
+| Rol | Cómo se obtiene | Acceso |
+|---|---|---|
+| Superusuario | `createsuperuser` | Todo, incluida la administración de otros superusuarios |
+| Administrador | Usuario con "Administrador del sistema" marcado (`is_staff`) | Todo el sistema y la mantención de usuarios |
+| Operador | Usuario normal | Panel, CRUD de entidades y reportes; **no** ve la mantención de usuarios (recibe 403) |
 
-```bash
-python manage.py createsuperuser
-```
+---
 
-Posteriormente se accede a:
-
-```text
-http://127.0.0.1:8000/admin/
-```
-
-## 9. Datos de prueba
-
-Para cargar información inicial del sistema se utiliza:
+## 5. Pruebas automáticas
 
 ```bash
-python manage.py seed_courier
+python manage.py test courier
 ```
 
-Esto genera registros de prueba para validar el funcionamiento de la aplicación con datos realistas.
+Son 52 pruebas que verifican, entre otras cosas:
 
-## 10. Verificación
+- login correcto e incorrecto, usuario desactivado, parámetro `next` seguro y cambio de id de sesión,
+- que **todas** las URLs privadas redirigen al login sin sesión, y que un POST sin sesión no modifica la base,
+- que el logout solo acepta POST y quita el acceso,
+- la mantención de usuarios y sus restricciones (operador = 403, no auto-desactivarse, etc.),
+- crear, editar y eliminar cada una de las 9 entidades, y que el cambio quede en la base de datos,
+- las validaciones (RUT, patente, fechas, origen ≠ destino, registros protegidos),
+- los 20 reportes y la exactitud de sus resultados.
 
-Para comprobar que el proyecto funciona correctamente:
+Para correrlas sin MySQL (por ejemplo, en otro computador): `set DB_ENGINE=sqlite` y luego el mismo comando.
 
-```bash
-python manage.py test
-```
+---
 
-## 11. Resultado esperado
+## 6. Seguridad aplicada
 
-La aplicación cumple con los principales objetivos de la evaluación:
+- Contraseñas guardadas con hash (PBKDF2 de Django) y validadores de largo mínimo, contraseñas comunes, solo números y similitud con el usuario.
+- Protección **CSRF** en todos los formularios. El logout y la desactivación de usuarios solo aceptan POST.
+- Al iniciar sesión, Django **renueva el id de sesión** (evita la fijación de sesión).
+- Sesión con expiración por inactividad (1 hora) y al cerrar el navegador. Cookies `HttpOnly` y `SameSite=Lax`, y `Secure` cuando `DEBUG=False`.
+- Las páginas privadas se envían con `Cache-Control: no-store`: tras el logout, "Atrás" no muestra datos.
+- Control de acceso por rol: solo los administradores gestionan usuarios, y solo un superusuario puede modificar a otro superusuario. Nadie puede desactivarse ni quitarse su propio rol.
+- La redirección `next` del login solo acepta URLs del propio sitio (evita redirecciones abiertas).
+- La clave secreta y las credenciales de la base van en `.env`, no en el código. Con `DEBUG=False`, el sistema exige `DJANGO_SECRET_KEY`.
+- El ORM parametriza todas las consultas, lo que previene inyección SQL. Las plantillas escapan HTML, y los datos de los gráficos viajan con `json_script`.
 
-- conexión a base de datos,
-- modelos bien definidos,
-- migraciones generadas y aplicadas,
-- administración mediante Django Admin,
-- CRUD funcional,
-- filtros y búsquedas,
-- carga de datos de prueba.
+---
 
-## 12. Autor
+## 7. Uso de inteligencia artificial como apoyo
 
-Pablo Martínez
+Se usó un asistente de IA (Claude) para analizar el enunciado, proponer la estructura, generar y revisar código, y sugerir medidas de seguridad. Las recomendaciones se evaluaron antes de aplicarlas:
 
-## 13. Nota final
+| Recomendación | Decisión |
+|---|---|
+| Proteger las vistas con `@login_required` y crear un decorador propio para el rol administrador | Aplicada |
+| Cerrar sesión solo por POST con CSRF | Aplicada (además, Django 5+ lo exige) |
+| Encabezados `no-store` para que "Atrás" no muestre páginas privadas tras el logout | Aplicada (middleware) |
+| Credenciales en variables de entorno / `.env` | Aplicada, con un lector de `.env` sin dependencias extra |
+| Usar `PROTECT` en las claves foráneas en vez de `CASCADE` | Aplicada: evita borrar envíos al eliminar una sucursal |
+| Usar `__date` / `TruncMonth` para agrupar por fecha | **Descartada**: en MySQL sin tablas de zona horaria devuelven `NULL`. Se reemplazó por rangos `__gte/__lt` y agregación condicional |
+| Bloquear cuentas tras varios intentos fallidos de login (`django-axes`) | **No aplicada**: suma una dependencia y configuración fuera del alcance. Queda como mejora futura |
+| Usar vistas basadas en clases genéricas para todo el CRUD | **Descartada** en favor de funciones con decoradores, que dejan explícito el control de acceso que pide la pauta |
 
-Este README está orientado exclusivamente a la Evaluación 2: Aplicación web con Django Admin.
+---
+
+## 8. Evaluación anterior
+
+La Evaluación 2 (Django Admin) sigue disponible en el historial de Git (commit `89bb814`). Desde la Evaluación 3, la administración se hace solo con el sistema propio.
+
+## Autor
+
+Pablo Martínez, Programación Backend.

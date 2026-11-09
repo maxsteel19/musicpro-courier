@@ -1,0 +1,6 @@
+{# Botones Editar / Eliminar de una fila. Uso: include con editar=url eliminar=url #}
+<div class="d-flex gap-1 justify-content-end">
+    {% if detalle %}<a href="{{ detalle }}" class="btn btn-outline-custom btn-icon" title="Ver detalle"><i class="fas fa-eye"></i></a>{% endif %}
+    <a href="{{ editar }}" class="btn btn-outline-custom btn-icon" title="Editar"><i class="fas fa-pen"></i></a>
+    <a href="{{ eliminar }}" class="btn btn-outline-custom btn-icon" title="Eliminar"><i class="fas fa-trash"></i></a>
+</div>

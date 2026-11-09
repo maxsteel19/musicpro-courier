@@ -1,0 +1,73 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ empresa }} Courier | Envíos de instrumentos entre sucursales</title>
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-public sticky-top">
+    <div class="container flex-nowrap">
+        <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="{% url 'courier:inicio' %}">
+            <span class="app-brand-icon"><i class="fas fa-truck-fast text-white"></i></span>{{ empresa }}<span class="d-none d-sm-inline"> Courier</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'courier:dashboard' %}" class="btn btn-primary-custom"><i class="fas fa-gauge-high me-1"></i>Ir al panel</a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary-custom"><i class="fas fa-right-to-bracket me-1"></i>Iniciar sesión</a>
+        {% endif %}
+    </div>
+</nav>
+
+<header class="hero">
+    <div class="container">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-7">
+                <span class="badge-estado estado-info mb-3">Logística de instrumentos musicales</span>
+                <h1 class="display-5 fw-bold">Envíos seguros entre las sucursales de <span style="color:var(--primary);">{{ empresa }}</span></h1>
+                <p class="lead text-muted-custom mt-3">Gestionamos el traslado de guitarras, baterías, amplificadores y equipos de audio con flota propia, conductores certificados y seguimiento de cada envío.</p>
+                <div class="d-flex gap-2 mt-4 flex-wrap">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'courier:dashboard' %}" class="btn btn-primary-custom btn-lg">Ir al panel</a>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary-custom btn-lg">Acceso para personal</a>
+                    {% endif %}
+                    <a href="#sucursales" class="btn btn-outline-custom btn-lg">Ver sucursales</a>
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="row g-3">
+                    <div class="col-6"><div class="card-dark p-3 h-100"><i class="fas fa-route fa-lg mb-2" style="color:var(--info);"></i><div class="fw-semibold">Rutas planificadas</div><small class="text-muted-custom">Viajes con vehículo y conductor asignado.</small></div></div>
+                    <div class="col-6"><div class="card-dark p-3 h-100"><i class="fas fa-location-crosshairs fa-lg mb-2" style="color:var(--success);"></i><div class="fw-semibold">Seguimiento</div><small class="text-muted-custom">Estado y progreso de cada envío.</small></div></div>
+                    <div class="col-6"><div class="card-dark p-3 h-100"><i class="fas fa-shield-halved fa-lg mb-2" style="color:var(--warning);"></i><div class="fw-semibold">Carga asegurada</div><small class="text-muted-custom">Valor declarado e incidencias registradas.</small></div></div>
+                    <div class="col-6"><div class="card-dark p-3 h-100"><i class="fas fa-bell fa-lg mb-2" style="color:var(--primary);"></i><div class="fw-semibold">Notificaciones</div><small class="text-muted-custom">Avisos por email, SMS y push.</small></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<section id="sucursales" class="py-5">
+    <div class="container">
+        <h2 class="h3 fw-bold mb-4">Nuestras sucursales</h2>
+        <div class="row g-3">
+            {% for s in sucursales %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card-dark p-3 h-100">
+                    <div class="fw-semibold"><i class="fas fa-store me-2" style="color:var(--primary);"></i>{{ s.nombre }}</div>
+                    <small class="text-muted-custom">{{ s.direccion }} · {{ s.ciudad }}</small>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted-custom">Pronto publicaremos nuestras sucursales.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<footer class="app-footer text-center">{{ empresa }} Courier &middot; {{ anio_actual }} &middot; Programación Backend</footer>
+</body>
+</html>

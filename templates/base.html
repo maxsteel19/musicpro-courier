@@ -1,0 +1,103 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ titulo|default:"Panel" }}{% endblock %} | {{ empresa }} Courier</title>
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% with url=request.resolver_match.url_name %}
+<aside class="app-sidebar" id="sidebar">
+    <a class="app-brand" href="{% url 'courier:dashboard' %}">
+        <span class="app-brand-icon"><i class="fas fa-truck-fast text-white"></i></span>
+        <span>
+            <span class="app-brand-title d-block">{{ empresa }}</span>
+            <span class="app-brand-sub">Courier y Transporte</span>
+        </span>
+    </a>
+    <nav class="app-nav">
+        <a href="{% url 'courier:dashboard' %}" class="{% if url == 'dashboard' %}active{% endif %}"><i class="fas fa-gauge-high"></i> Panel de control</a>
+        <a href="{% url 'courier:seguimiento' %}" class="{% if url == 'seguimiento' %}active{% endif %}"><i class="fas fa-location-crosshairs"></i> Seguimiento</a>
+        <a href="{% url 'courier:reportes' %}" class="{% if 'reporte' in url %}active{% endif %}"><i class="fas fa-chart-column"></i> Reportes ORM</a>
+
+        <div class="app-nav-section">Courier</div>
+        <a href="{% url 'courier:envio_lista' %}" class="{% if url|slice:':5' == 'envio' %}active{% endif %}"><i class="fas fa-truck-fast"></i> Envíos</a>
+        <a href="{% url 'courier:paquete_lista' %}" class="{% if url|slice:':7' == 'paquete' %}active{% endif %}"><i class="fas fa-box"></i> Paquetes</a>
+        <a href="{% url 'courier:sucursal_lista' %}" class="{% if url|slice:':8' == 'sucursal' %}active{% endif %}"><i class="fas fa-store"></i> Sucursales</a>
+        <a href="{% url 'courier:incidencia_lista' %}" class="{% if url|slice:':10' == 'incidencia' %}active{% endif %}"><i class="fas fa-triangle-exclamation"></i> Incidencias</a>
+        <a href="{% url 'courier:notificacion_lista' %}" class="{% if url|slice:':12' == 'notificacion' %}active{% endif %}"><i class="fas fa-bell"></i> Notificaciones</a>
+
+        <div class="app-nav-section">Transporte</div>
+        <a href="{% url 'courier:viaje_lista' %}" class="{% if url|slice:':5' == 'viaje' %}active{% endif %}"><i class="fas fa-route"></i> Viajes</a>
+        <a href="{% url 'courier:vehiculo_lista' %}" class="{% if url|slice:':8' == 'vehiculo' %}active{% endif %}"><i class="fas fa-truck"></i> Vehículos</a>
+        <a href="{% url 'courier:conductor_lista' %}" class="{% if url|slice:':9' == 'conductor' %}active{% endif %}"><i class="fas fa-id-card"></i> Conductores</a>
+        <a href="{% url 'courier:tipo_vehiculo_lista' %}" class="{% if url|slice:':13' == 'tipo_vehiculo' %}active{% endif %}"><i class="fas fa-layer-group"></i> Tipos de vehículo</a>
+
+        <div class="app-nav-section">Cuenta</div>
+        {% if es_admin %}
+        <a href="{% url 'courier:usuario_lista' %}" class="{% if url|slice:':7' == 'usuario' %}active{% endif %}"><i class="fas fa-users-gear"></i> Usuarios</a>
+        {% endif %}
+        <a href="{% url 'courier:perfil' %}" class="{% if url == 'perfil' or url == 'password_cambiar' %}active{% endif %}"><i class="fas fa-user-shield"></i> Mi perfil</a>
+        <a href="{% url 'courier:inicio' %}"><i class="fas fa-globe"></i> Sitio público</a>
+    </nav>
+</aside>
+{% endwith %}
+
+<div class="app-main">
+    <header class="app-topbar">
+        <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-outline-custom btn-icon sidebar-toggle" type="button" id="btn-sidebar" aria-label="Abrir menú">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1>{% block encabezado %}{{ titulo }}{% endblock %}</h1>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <a href="{% url 'courier:perfil' %}" class="text-decoration-none d-none d-sm-flex align-items-center gap-2" style="color:var(--text-primary);">
+                <span class="kpi-icon bg-soft-blue" style="width:36px;height:36px;font-size:.95rem;"><i class="fas fa-user"></i></span>
+                <span class="lh-sm">
+                    <span class="d-block fw-semibold" style="font-size:.9rem;">{{ user.get_full_name|default:user.username }}</span>
+                    <span class="d-block text-muted-custom" style="font-size:.72rem;">{% if user.is_superuser %}Superusuario{% elif user.is_staff %}Administrador{% else %}Operador{% endif %}</span>
+                </span>
+            </a>
+            {# El cierre de sesión se hace por POST con token CSRF (Django 5+ no acepta GET). #}
+            <form method="post" action="{% url 'logout' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-custom btn-sm" title="Cerrar sesión">
+                    <i class="fas fa-right-from-bracket me-1"></i><span class="d-none d-md-inline">Cerrar sesión</span>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <main class="app-content">
+        {% include "includes/mensajes.html" %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="app-footer d-flex justify-content-between flex-wrap gap-2">
+        <span>{{ empresa }} Courier &middot; {{ anio_actual }}</span>
+        <span>Programación Backend &middot; Evaluación 3: Aplicación web con CRUD</span>
+    </footer>
+</div>
+
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+<script>
+    (function () {
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('btn-sidebar').addEventListener('click', function (evento) {
+            evento.stopPropagation();
+            sidebar.classList.toggle('open');
+        });
+        // En pantallas pequeñas, tocar fuera del menú lo cierra.
+        document.querySelector('.app-main').addEventListener('click', function () {
+            sidebar.classList.remove('open');
+        });
+    })();
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

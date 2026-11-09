@@ -1,0 +1,54 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión | {{ empresa }} Courier</title>
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+</head>
+<body>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="text-center mb-4">
+            <span class="app-brand-icon mx-auto mb-3" style="width:56px;height:56px;border-radius:14px;"><i class="fas fa-truck-fast fa-lg text-white"></i></span>
+            <h1 class="h4 fw-bold mb-1">{{ empresa }} Courier</h1>
+            <p class="text-muted-custom mb-0">Sistema administrativo de envíos y transporte</p>
+        </div>
+        <div class="card-dark">
+            <div class="card-body p-4">
+                {% include "includes/mensajes.html" %}
+                {% if next and not user.is_authenticated %}
+                <div class="alert alert-warning small"><i class="fas fa-lock me-1"></i>Debe iniciar sesión para acceder a esa página.</div>
+                {% endif %}
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger small">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+                {% endif %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ form.username.id_for_label }}">Usuario</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="fas fa-user"></i></span>
+                            {{ form.username }}
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label" for="{{ form.password.id_for_label }}">Contraseña</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-secondary text-secondary"><i class="fas fa-lock"></i></span>
+                            {{ form.password }}
+                        </div>
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <button type="submit" class="btn btn-primary-custom w-100 py-2"><i class="fas fa-right-to-bracket me-1"></i>Iniciar sesión</button>
+                </form>
+            </div>
+        </div>
+        <p class="text-center mt-3"><a href="{% url 'courier:inicio' %}" class="text-muted-custom small text-decoration-none"><i class="fas fa-arrow-left me-1"></i>Volver al sitio público</a></p>
+    </div>
+</div>
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

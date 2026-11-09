@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-xl-9">
+        <div class="card-dark">
+            <div class="card-header d-flex align-items-center gap-2">
+                <span class="kpi-icon bg-soft-red" style="width:36px;height:36px;font-size:1rem;"><i class="fas {{ icono }}"></i></span>
+                {{ titulo }}
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{% for e in form.non_field_errors %}{{ e }}<br>{% endfor %}</div>
+                    {% endif %}
+                    <div class="row g-3">
+                        {% for campo in form %}
+                        <div class="{% if campo.field.widget.attrs.rows %}col-12{% else %}col-md-6{% endif %}">
+                            {% include "includes/campo.html" %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% if ciudades %}
+                    <datalist id="lista-ciudades">{% for c in ciudades %}<option value="{{ c }}">{% endfor %}</datalist>
+                    {% endif %}
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <a href="{% url url_volver %}" class="btn btn-outline-custom">Cancelar</a>
+                        <button type="submit" class="btn btn-primary-custom"><i class="fas fa-floppy-disk me-1"></i>{% if es_edicion %}Guardar cambios{% else %}Crear{% endif %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

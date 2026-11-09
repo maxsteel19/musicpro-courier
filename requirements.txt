@@ -1,0 +1,8 @@
+# Django 6.x requiere Python 3.12+ y MySQL 8.4+ (o MariaDB 10.11+).
+# Si su MySQL es 8.0, instale Django 5.2 LTS: pip install "Django>=5.2,<6.0"
+Django>=5.2,<6.2
+Faker>=30.0
+# Driver de MySQL 100 % Python (no requiere compilar en Windows).
+PyMySQL>=1.1
+# Necesario para la autenticación caching_sha2_password de MySQL 8.
+cryptography>=42.0

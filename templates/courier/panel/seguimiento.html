@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card-dark mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md">
+                <label for="numero" class="form-label">Buscar envío por número</label>
+                <input type="search" class="form-control" id="numero" name="numero" value="{{ numero }}" placeholder="Ej: ENV-2026-0001">
+            </div>
+            <div class="col-auto"><button class="btn btn-primary-custom" type="submit"><i class="fas fa-magnifying-glass me-1"></i>Rastrear</button></div>
+        </form>
+    </div>
+</div>
+
+<h2 class="h6 text-muted-custom text-uppercase mb-3">Envíos en curso ({{ envios|length }})</h2>
+<div class="row g-3">
+    {% for e in envios %}
+    <div class="col-md-6 col-xl-4">
+        <a href="{% url 'courier:envio_detalle' e.pk %}" class="card-dark reporte-card h-100 p-3" style="color:var(--text-primary);">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="fw-semibold">{{ e.numero_envio }}</span>
+                <span class="badge-estado badge-{{ e.estado }}">{{ e.get_estado_display }}</span>
+            </div>
+            <div class="small mb-2">{{ e.sucursal_origen.ciudad }} <i class="fas fa-arrow-right mx-1 text-muted-custom"></i> {{ e.sucursal_destino.ciudad }}</div>
+            <div class="progress mb-1"><div class="progress-bar" style="width:{{ e.progreso }}%"></div></div>
+            <div class="d-flex justify-content-between small text-muted-custom">
+                <span>{{ e.progreso }}%</span>
+                <span>{% if e.viaje %}<i class="fas fa-user me-1"></i>{{ e.viaje.conductor.nombre }}{% else %}Sin viaje{% endif %}</span>
+            </div>
+        </a>
+    </div>
+    {% empty %}
+    <div class="col-12"><div class="card-dark empty-state"><i class="fas fa-truck-fast"></i>No hay envíos en curso.</div></div>
+    {% endfor %}
+</div>
+{% endblock %}

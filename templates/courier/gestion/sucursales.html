@@ -1,0 +1,29 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}Nombre, ciudad o dirección{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
+    <select name="estado" id="estado" class="form-select">
+        <option value="">Todas</option>
+        <option value="activa" {% if estado == 'activa' %}selected{% endif %}>Activas</option>
+        <option value="inactiva" {% if estado == 'inactiva' %}selected{% endif %}>Inactivas</option>
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:sucursal_crear' %}{% endblock %}
+{% block texto_nuevo %}Nueva sucursal{% endblock %}
+{% block columnas %}<th>Nombre</th><th>Ciudad</th><th>Contacto</th><th class="text-center">Envíos (salida / llegada)</th><th>Estado</th>{% endblock %}
+{% block filas %}
+{% for s in pagina %}
+<tr>
+    <td><div class="fw-semibold">{{ s.nombre }}</div><small class="text-muted-custom">{{ s.direccion }}</small></td>
+    <td>{{ s.ciudad }}</td>
+    <td><small>{{ s.telefono }}<br>{{ s.email }}</small></td>
+    <td class="text-center">{{ s.envios_enviados }} / {{ s.envios_recibidos }}</td>
+    <td>{% if s.activa %}<span class="badge-estado estado-ok">Activa</span>{% else %}<span class="badge-estado estado-bad">Inactiva</span>{% endif %}</td>
+    <td>{% url 'courier:sucursal_editar' s.pk as u_editar %}{% url 'courier:sucursal_eliminar' s.pk as u_eliminar %}{% include "includes/acciones.html" with editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="6"><div class="empty-state"><i class="fas fa-store"></i>No hay sucursales que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}

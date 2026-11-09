@@ -1,0 +1,30 @@
+{% extends "courier/gestion/_lista_base.html" %}
+{% block placeholder %}Nombre, RUT o licencia{% endblock %}
+{% block filtros %}
+<div class="col-6 col-md-2">
+    <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
+    <select name="estado" id="estado" class="form-select">
+        <option value="">Todos</option>
+        <option value="activo" {% if estado == 'activo' %}selected{% endif %}>Activos</option>
+        <option value="inactivo" {% if estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
+    </select>
+</div>
+{% endblock %}
+{% block url_nuevo %}{% url 'courier:conductor_crear' %}{% endblock %}
+{% block texto_nuevo %}Nuevo conductor{% endblock %}
+{% block columnas %}<th>Nombre</th><th>RUT</th><th>Licencia</th><th>Teléfono</th><th class="text-center">Viajes (finalizados)</th><th>Estado</th>{% endblock %}
+{% block filas %}
+{% for c in pagina %}
+<tr>
+    <td class="fw-semibold">{{ c.nombre }}</td>
+    <td>{{ c.rut }}</td>
+    <td>{{ c.licencia }}</td>
+    <td><small>{{ c.telefono|default:"—" }}</small></td>
+    <td class="text-center">{{ c.total_viajes }} <small class="text-muted-custom">({{ c.viajes_finalizados }})</small></td>
+    <td>{% if c.activo %}<span class="badge-estado estado-ok">Activo</span>{% else %}<span class="badge-estado estado-bad">Inactivo</span>{% endif %}</td>
+    <td>{% url 'courier:conductor_editar' c.pk as u_editar %}{% url 'courier:conductor_eliminar' c.pk as u_eliminar %}{% include "includes/acciones.html" with editar=u_editar eliminar=u_eliminar %}</td>
+</tr>
+{% empty %}
+<tr><td colspan="7"><div class="empty-state"><i class="fas fa-id-card"></i>No hay conductores que coincidan.</div></td></tr>
+{% endfor %}
+{% endblock %}
