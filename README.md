@@ -221,6 +221,7 @@ courier/
 templates/                Plantillas (base con menú lateral, CRUD, reportes)
 static/                   CSS, JS (tooltips) y librerías locales (Bootstrap, Font Awesome)
 docs/GUIA_DEFENSA.md      Guía para explicar el proyecto en la defensa
+docs/Evaluacion3_MusicProCourier_PabloMartinez.pdf   Informe entregado en la intranet
 Ejercicios/               Ejercicios de clase (proyecto independiente)
 ```
 
