@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
 
 from ..decorators import administrador_requerido
-from ..forms import UsuarioCrearForm, UsuarioEditarForm, UsuarioPasswordForm
+from ..entradas import DatosCrearUsuario, DatosEditarUsuario, DatosPasswordUsuario
 from .utils import paginar, parametros_sin_pagina
 
 Usuario = get_user_model()
@@ -50,7 +50,7 @@ def usuario_lista(request):
 
 @administrador_requerido
 def usuario_crear(request):
-    form = UsuarioCrearForm(request.POST or None)
+    form = DatosCrearUsuario(request.POST or None)
     if request.method == 'POST' and form.is_valid():
         usuario = form.save()  # la contraseña se guarda con hash (PBKDF2)
         messages.success(request, f'Usuario "{usuario.username}" creado correctamente.')
@@ -64,7 +64,7 @@ def usuario_crear(request):
 def usuario_editar(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     _verificar_puede_modificar(request.user, usuario)
-    form = UsuarioEditarForm(request.POST or None, instance=usuario, editor=request.user)
+    form = DatosEditarUsuario(request.POST or None, instance=usuario, editor=request.user)
     if request.method == 'POST' and form.is_valid():
         form.save()
         messages.success(request, f'Usuario "{usuario.username}" actualizado correctamente.')
@@ -78,7 +78,7 @@ def usuario_editar(request, pk):
 def usuario_password(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     _verificar_puede_modificar(request.user, usuario)
-    form = UsuarioPasswordForm(usuario, request.POST or None)
+    form = DatosPasswordUsuario(usuario, request.POST or None)
     if request.method == 'POST' and form.is_valid():
         form.save()
         if usuario.pk == request.user.pk:

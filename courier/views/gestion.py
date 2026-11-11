@@ -9,9 +9,9 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
 
-from ..forms import (
-    ConductorForm, EnvioForm, IncidenciaForm, NotificacionForm, PaqueteForm,
-    SucursalForm, TipoVehiculoForm, VehiculoForm, ViajeForm,
+from ..entradas import (
+    DatosConductor, DatosEnvio, DatosIncidencia, DatosNotificacion, DatosPaquete,
+    DatosSucursal, DatosTipoVehiculo, DatosVehiculo, DatosViaje,
 )
 from ..models import (
     Conductor, Envio, Incidencia, Notificacion, Paquete, Sucursal,
@@ -66,13 +66,13 @@ def sucursal_lista(request):
 
 @login_required
 def sucursal_crear(request):
-    return formulario_crud(request, form_class=SucursalForm, titulo='Nueva sucursal',
+    return formulario_crud(request, form_class=DatosSucursal, titulo='Nueva sucursal',
                            url_lista='courier:sucursal_lista', icono='fa-store')
 
 
 @login_required
 def sucursal_editar(request, pk):
-    return formulario_crud(request, form_class=SucursalForm, titulo='Editar sucursal',
+    return formulario_crud(request, form_class=DatosSucursal, titulo='Editar sucursal',
                            url_lista='courier:sucursal_lista', icono='fa-store',
                            instancia=get_object_or_404(Sucursal, pk=pk))
 
@@ -106,13 +106,13 @@ def paquete_lista(request):
 
 @login_required
 def paquete_crear(request):
-    return formulario_crud(request, form_class=PaqueteForm, titulo='Nuevo paquete',
+    return formulario_crud(request, form_class=DatosPaquete, titulo='Nuevo paquete',
                            url_lista='courier:paquete_lista', icono='fa-box')
 
 
 @login_required
 def paquete_editar(request, pk):
-    return formulario_crud(request, form_class=PaqueteForm, titulo='Editar paquete',
+    return formulario_crud(request, form_class=DatosPaquete, titulo='Editar paquete',
                            url_lista='courier:paquete_lista', icono='fa-box',
                            instancia=get_object_or_404(Paquete, pk=pk))
 
@@ -160,14 +160,14 @@ def _registrar_creador(request):
 
 @login_required
 def envio_crear(request):
-    return formulario_crud(request, form_class=EnvioForm, titulo='Nuevo envío',
+    return formulario_crud(request, form_class=DatosEnvio, titulo='Nuevo envío',
                            url_lista='courier:envio_lista', icono='fa-truck-fast',
                            antes_de_guardar=_registrar_creador(request))
 
 
 @login_required
 def envio_editar(request, pk):
-    return formulario_crud(request, form_class=EnvioForm, titulo='Editar envío',
+    return formulario_crud(request, form_class=DatosEnvio, titulo='Editar envío',
                            url_lista='courier:envio_lista', icono='fa-truck-fast',
                            instancia=get_object_or_404(Envio, pk=pk))
 
@@ -222,14 +222,14 @@ def incidencia_crear(request):
     def asignar_autor(incidencia):
         incidencia.reportada_por = request.user
 
-    return formulario_crud(request, form_class=IncidenciaForm, titulo='Nueva incidencia',
+    return formulario_crud(request, form_class=DatosIncidencia, titulo='Nueva incidencia',
                            url_lista='courier:incidencia_lista', icono='fa-triangle-exclamation',
                            antes_de_guardar=asignar_autor)
 
 
 @login_required
 def incidencia_editar(request, pk):
-    return formulario_crud(request, form_class=IncidenciaForm, titulo='Editar incidencia',
+    return formulario_crud(request, form_class=DatosIncidencia, titulo='Editar incidencia',
                            url_lista='courier:incidencia_lista', icono='fa-triangle-exclamation',
                            instancia=get_object_or_404(Incidencia, pk=pk))
 
@@ -262,13 +262,13 @@ def notificacion_lista(request):
 
 @login_required
 def notificacion_crear(request):
-    return formulario_crud(request, form_class=NotificacionForm, titulo='Nueva notificación',
+    return formulario_crud(request, form_class=DatosNotificacion, titulo='Nueva notificación',
                            url_lista='courier:notificacion_lista', icono='fa-bell')
 
 
 @login_required
 def notificacion_editar(request, pk):
-    return formulario_crud(request, form_class=NotificacionForm, titulo='Editar notificación',
+    return formulario_crud(request, form_class=DatosNotificacion, titulo='Editar notificación',
                            url_lista='courier:notificacion_lista', icono='fa-bell',
                            instancia=get_object_or_404(Notificacion, pk=pk))
 
@@ -297,13 +297,13 @@ def tipo_vehiculo_lista(request):
 
 @login_required
 def tipo_vehiculo_crear(request):
-    return formulario_crud(request, form_class=TipoVehiculoForm, titulo='Nuevo tipo de vehículo',
+    return formulario_crud(request, form_class=DatosTipoVehiculo, titulo='Nuevo tipo de vehículo',
                            url_lista='courier:tipo_vehiculo_lista', icono='fa-layer-group')
 
 
 @login_required
 def tipo_vehiculo_editar(request, pk):
-    return formulario_crud(request, form_class=TipoVehiculoForm, titulo='Editar tipo de vehículo',
+    return formulario_crud(request, form_class=DatosTipoVehiculo, titulo='Editar tipo de vehículo',
                            url_lista='courier:tipo_vehiculo_lista', icono='fa-layer-group',
                            instancia=get_object_or_404(TipoVehiculo, pk=pk))
 
@@ -341,13 +341,13 @@ def vehiculo_lista(request):
 
 @login_required
 def vehiculo_crear(request):
-    return formulario_crud(request, form_class=VehiculoForm, titulo='Nuevo vehículo',
+    return formulario_crud(request, form_class=DatosVehiculo, titulo='Nuevo vehículo',
                            url_lista='courier:vehiculo_lista', icono='fa-truck')
 
 
 @login_required
 def vehiculo_editar(request, pk):
-    return formulario_crud(request, form_class=VehiculoForm, titulo='Editar vehículo',
+    return formulario_crud(request, form_class=DatosVehiculo, titulo='Editar vehículo',
                            url_lista='courier:vehiculo_lista', icono='fa-truck',
                            instancia=get_object_or_404(Vehiculo, pk=pk))
 
@@ -384,13 +384,13 @@ def conductor_lista(request):
 
 @login_required
 def conductor_crear(request):
-    return formulario_crud(request, form_class=ConductorForm, titulo='Nuevo conductor',
+    return formulario_crud(request, form_class=DatosConductor, titulo='Nuevo conductor',
                            url_lista='courier:conductor_lista', icono='fa-id-card')
 
 
 @login_required
 def conductor_editar(request, pk):
-    return formulario_crud(request, form_class=ConductorForm, titulo='Editar conductor',
+    return formulario_crud(request, form_class=DatosConductor, titulo='Editar conductor',
                            url_lista='courier:conductor_lista', icono='fa-id-card',
                            instancia=get_object_or_404(Conductor, pk=pk))
 
@@ -433,13 +433,13 @@ def _contexto_viaje():
 
 @login_required
 def viaje_crear(request):
-    return formulario_crud(request, form_class=ViajeForm, titulo='Nuevo viaje',
+    return formulario_crud(request, form_class=DatosViaje, titulo='Nuevo viaje',
                            url_lista='courier:viaje_lista', icono='fa-route', extra=_contexto_viaje())
 
 
 @login_required
 def viaje_editar(request, pk):
-    return formulario_crud(request, form_class=ViajeForm, titulo='Editar viaje',
+    return formulario_crud(request, form_class=DatosViaje, titulo='Editar viaje',
                            url_lista='courier:viaje_lista', icono='fa-route', extra=_contexto_viaje(),
                            instancia=get_object_or_404(Viaje, pk=pk))
 

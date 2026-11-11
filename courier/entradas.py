@@ -76,7 +76,7 @@ class ManualField:
         return mark_safe(f'<input type="{self.widget.input_type}" {" ".join(attrs)}>')
 
 
-class BaseManualForm:
+class BaseEntradaManual:
     form_fields = []
     labels = {}
     help_texts = {}
@@ -250,7 +250,7 @@ class BaseManualForm:
             self.fields[nombre].errors.append(mensaje)
 
 
-class BaseModelManualForm(BaseManualForm):
+class BaseModeloEntradaManual(BaseEntradaManual):
     model = None
 
     def __init__(self, data=None, instance=None, **kwargs):
@@ -268,14 +268,14 @@ class EstiloBootstrapMixin:
     """No-op para compatibilidad con el proyecto."""
 
 
-class SucursalForm(BaseModelManualForm):
+class DatosSucursal(BaseModeloEntradaManual):
     model = Sucursal
     form_fields = ['nombre', 'direccion', 'ciudad', 'telefono', 'email', 'latitud', 'longitud', 'activa']
     labels = {'direccion': 'Dirección', 'telefono': 'Teléfono'}
     widgets = {'activa': ManualWidget('checkbox'), 'email': ManualWidget('email')}
 
 
-class PaqueteForm(BaseModelManualForm):
+class DatosPaquete(BaseModeloEntradaManual):
     model = Paquete
     form_fields = ['codigo', 'descripcion', 'peso', 'volumen', 'valor_declarado', 'estado']
     labels = {'codigo': 'Código', 'descripcion': 'Descripción', 'peso': 'Peso (kg)', 'volumen': 'Volumen (m³)', 'valor_declarado': 'Valor declarado (CLP)'}
@@ -289,7 +289,7 @@ class PaqueteForm(BaseModelManualForm):
         return ok
 
 
-class EnvioForm(BaseModelManualForm):
+class DatosEnvio(BaseModeloEntradaManual):
     model = Envio
     form_fields = ['numero_envio', 'sucursal_origen', 'sucursal_destino', 'paquete', 'viaje', 'estado', 'prioridad', 'progreso', 'fecha_despacho', 'fecha_entrega_estimada', 'fecha_entrega_real', 'observaciones']
     labels = {'numero_envio': 'Número de envío', 'sucursal_origen': 'Sucursal de origen', 'sucursal_destino': 'Sucursal de destino', 'progreso': 'Progreso (%)', 'fecha_despacho': 'Fecha de despacho', 'fecha_entrega_estimada': 'Entrega estimada', 'fecha_entrega_real': 'Entrega real'}
@@ -326,28 +326,28 @@ class EnvioForm(BaseModelManualForm):
         return ok
 
 
-class IncidenciaForm(BaseModelManualForm):
+class DatosIncidencia(BaseModeloEntradaManual):
     model = Incidencia
     form_fields = ['envio', 'tipo', 'descripcion', 'resuelta']
     labels = {'envio': 'Envío', 'descripcion': 'Descripción'}
     widgets = {'descripcion': ManualWidget('textarea', {'rows': 4})}
 
 
-class NotificacionForm(BaseModelManualForm):
+class DatosNotificacion(BaseModeloEntradaManual):
     model = Notificacion
     form_fields = ['envio', 'canal', 'mensaje', 'enviada']
     labels = {'envio': 'Envío'}
     widgets = {'mensaje': ManualWidget('textarea', {'rows': 4})}
 
 
-class TipoVehiculoForm(BaseModelManualForm):
+class DatosTipoVehiculo(BaseModeloEntradaManual):
     model = TipoVehiculo
     form_fields = ['nombre', 'descripcion']
     labels = {'descripcion': 'Descripción'}
     widgets = {'descripcion': ManualWidget('textarea', {'rows': 3})}
 
 
-class VehiculoForm(BaseModelManualForm):
+class DatosVehiculo(BaseModeloEntradaManual):
     model = Vehiculo
     form_fields = ['tipo_vehiculo', 'patente', 'marca', 'modelo', 'anio', 'estado', 'disponible']
     labels = {'tipo_vehiculo': 'Tipo de vehículo', 'disponible': 'Disponible para viajes'}
@@ -373,7 +373,7 @@ class VehiculoForm(BaseModelManualForm):
         return ok
 
 
-class ConductorForm(BaseModelManualForm):
+class DatosConductor(BaseModeloEntradaManual):
     model = Conductor
     form_fields = ['rut', 'nombre', 'licencia', 'telefono', 'activo']
     labels = {'licencia': 'Licencia de conducir', 'telefono': 'Teléfono'}
@@ -399,7 +399,7 @@ class ConductorForm(BaseModelManualForm):
         return ok
 
 
-class ViajeForm(BaseModelManualForm):
+class DatosViaje(BaseModeloEntradaManual):
     model = Viaje
     form_fields = ['vehiculo', 'conductor', 'origen', 'destino', 'fecha_salida', 'fecha_llegada', 'estado', 'observaciones']
     labels = {'vehiculo': 'Vehículo', 'fecha_salida': 'Fecha de salida', 'fecha_llegada': 'Fecha de llegada'}
@@ -443,7 +443,7 @@ ETIQUETAS_USUARIO = {'username': 'Nombre de usuario', 'first_name': 'Nombre', 'l
 AYUDAS_USUARIO = {'username': 'Hasta 150 caracteres: letras, números y @/./+/-/_', 'is_staff': 'Los administradores pueden gestionar usuarios.', 'is_active': 'Desmarque para bloquear el acceso sin eliminar la cuenta.'}
 
 
-class UsuarioCrearForm(BaseManualForm):
+class DatosCrearUsuario(BaseEntradaManual):
     form_fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'is_staff', 'is_active']
     labels = ETIQUETAS_USUARIO
     help_texts = AYUDAS_USUARIO
@@ -481,7 +481,7 @@ class UsuarioCrearForm(BaseManualForm):
         return usuario
 
 
-class UsuarioEditarForm(BaseManualForm):
+class DatosEditarUsuario(BaseEntradaManual):
     model = Usuario
     form_fields = ['username', 'first_name', 'last_name', 'email', 'is_staff', 'is_active']
     labels = ETIQUETAS_USUARIO
@@ -507,7 +507,7 @@ class UsuarioEditarForm(BaseManualForm):
         return usuario
 
 
-class UsuarioPasswordForm(BaseManualForm):
+class DatosPasswordUsuario(BaseEntradaManual):
     form_fields = ['new_password1', 'new_password2']
     labels = {'new_password1': 'Nueva contraseña', 'new_password2': 'Confirmar contraseña'}
     widgets = {'new_password1': ManualWidget('password'), 'new_password2': ManualWidget('password')}
@@ -537,7 +537,7 @@ class UsuarioPasswordForm(BaseManualForm):
         return self.usuario
 
 
-class ParametrosReporteForm(BaseManualForm):
+class ParametrosReporte(BaseEntradaManual):
     form_fields = ['tipo', 'vehiculo', 'conductor', 'desde', 'hasta', 'anio']
     labels = {'tipo': 'Tipo de vehículo', 'vehiculo': 'Vehículo', 'conductor': 'Conductor', 'desde': 'Desde', 'hasta': 'Hasta', 'anio': 'Año'}
     widgets = {'tipo': ManualWidget('select'), 'vehiculo': ManualWidget('select'), 'conductor': ManualWidget('select'), 'desde': EntradaFecha(), 'hasta': EntradaFecha()}

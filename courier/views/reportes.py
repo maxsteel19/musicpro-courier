@@ -11,7 +11,7 @@ from django.test.utils import CaptureQueriesContext
 from django.utils import timezone
 
 from .. import graficos
-from ..forms import ParametrosReporteForm
+from ..entradas import ParametrosReporte
 from ..models import Conductor, TipoVehiculo, Vehiculo, Viaje
 from ..reportes import REPORTES
 
@@ -61,10 +61,10 @@ def reporte_detalle(request, numero):
 
     iniciales = _valores_por_defecto(reporte)
     if request.GET:
-        form = ParametrosReporteForm(request.GET, initial=iniciales)
+        form = ParametrosReporte(request.GET, initial=iniciales)
         enviados = form.cleaned_data if form.is_valid() else None
     else:
-        form = ParametrosReporteForm(initial=iniciales)
+        form = ParametrosReporte(initial=iniciales)
         enviados = {}
 
     resultado = None
