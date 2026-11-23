@@ -26,5 +26,18 @@
             </div>
         </div>
     </div>
+    <div class="col-12">
+        <div class="card-dark">
+            <div class="card-header"><i class="fas fa-file-signature me-2" style="color:var(--warning);"></i>Acuerdo de uso y confidencialidad de datos</div>
+            <div class="card-body small d-flex flex-wrap justify-content-between align-items-center gap-2">
+                {% if perfil_seguridad.acepto_acuerdo_vigente %}
+                <span><i class="fas fa-circle-check me-1" style="color:var(--success);"></i>Aceptó la versión {{ perfil_seguridad.acuerdo_version }} el {{ perfil_seguridad.acuerdo_aceptado_en|date:"d/m/Y H:i" }} desde la IP {{ perfil_seguridad.acuerdo_ip|default:"—" }}.</span>
+                {% else %}
+                <span><i class="fas fa-triangle-exclamation me-1" style="color:var(--warning);"></i>No ha aceptado la versión vigente del acuerdo.</span>
+                {% endif %}
+                <a href="{% url 'courier:acuerdo_datos' %}" class="btn btn-outline-custom btn-sm"><i class="fas fa-eye me-1"></i>Ver acuerdo</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

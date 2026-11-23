@@ -167,7 +167,7 @@ Si listas 100 viajes y en la plantilla muestras `viaje.conductor.nombre`, Django
 
 ## 10. Pruebas
 
-`python manage.py test courier` ejecuta 60 pruebas (carpeta `courier/tests/`). Si te preguntan cómo sabes que la protección funciona, muestra `test_autenticacion.py`.
+`python manage.py test courier` ejecuta 95 pruebas (carpeta `courier/tests/`), con una cobertura de código de 94 % (`coverage run manage.py test courier` y luego `coverage report`). Si te preguntan cómo sabes que la protección funciona, muestra `test_autenticacion.py` y `test_seguridad.py`.
 
 ---
 
@@ -179,3 +179,27 @@ Si listas 100 viajes y en la plantilla muestras `viaje.conductor.nombre`, Django
 - **¿Qué hace `on_delete=PROTECT`?** Impide borrar un registro mientras otros lo referencian.
 - **¿Para qué sirve `get_object_or_404`?** Si el id no existe, responde 404 en vez de un error 500.
 - **¿Por qué hay un `.env.example` y no un `.env` en GitHub?** El ejemplo muestra qué variables hacen falta, sin exponer las claves reales.
+
+---
+
+## 12. Demostración del prototipo: puntos de seguridad que se revisan
+
+Orden sugerido, siguiendo la lista de la pizarra:
+
+1. **Acceso.** En `/cuentas/login/` escribe 2 veces una clave incorrecta: el mensaje dice cuántos intentos quedan. Al quinto error la cuenta queda bloqueada 15 minutos, aunque después escribas la clave correcta. Entra con otra cuenta de administrador, ve a **Usuarios**: aparece "Bloqueada" y el botón del candado abierto la desbloquea. Luego muestra **¿Olvidó su contraseña?**: el correo con el enlace aparece en la consola de `runserver`; el enlace sirve una sola vez.
+2. **Roles.** Crea un operador desde **Usuarios** (con una clave temporal). Entra con él: primero debe aceptar el acuerdo y cambiar la clave. Muestra que no ve **Usuarios** ni **Auditoría**, y que si escribe `/usuarios/` en la barra recibe 403.
+3. **Validación de datos.** En **Sucursales → Nueva**, escribe `<script>alert(1)</script>` en el nombre: se rechaza. Prueba letras en latitud, un correo inválido o un año 1800 en un vehículo: cada error se informa sin romper la página.
+4. **Mantenedores.** CRUD de las 9 entidades y de usuarios, sin Django Admin.
+5. **Control de sesiones.** **Mi perfil** muestra el inicio de la sesión y cuándo expira (1 hora de inactividad o al cerrar el navegador). Cierra sesión y presiona "Atrás": pide login.
+6. **Protección de datos confidenciales.** En MySQL Workbench abre `courier_conductor`: las columnas `rut` y `telefono` están cifradas, pero en la aplicación se ven normales. En `auth_user.password` solo hay hashes.
+7. **Acuerdo de uso de datos.** Al primer ingreso aparece `/acuerdo-datos/`; sin marcar la casilla no deja continuar, y "No acepto" cierra la sesión. **Mi perfil** muestra la versión, la fecha y la IP de la aceptación. La política pública está en `/privacidad/`.
+8. **Seguridad de la aplicación.** Abre **Auditoría**: ahí quedaron los intentos fallidos, el bloqueo, el 403 del operador y cada cambio, con usuario, fecha e IP. Menciona también CSRF, CSP (cabecera `Content-Security-Policy`) y el ORM parametrizado.
+
+### Preguntas probables
+
+- **¿Por qué el bloqueo es temporal y no desactiva la cuenta?** Si desactivara la cuenta, cualquiera podría dejar fuera a un usuario escribiendo mal su clave 5 veces.
+- **¿Por qué el mensaje es igual si el usuario no existe?** Para no revelar qué nombres de usuario existen (enumeración de usuarios).
+- **¿Cómo buscan un conductor por RUT si está cifrado?** Con una huella HMAC-SHA256 del RUT, guardada en `rut_huella`: permite comparar y exigir unicidad sin guardar el RUT en claro.
+- **¿Dónde está la clave de cifrado?** En `.env` (`DJANGO_CLAVE_CIFRADO`), fuera del código y de GitHub.
+- **¿Por qué se permite el apóstrofo?** Porque aparece en datos reales (Av. O'Higgins). No es peligroso: el ORM parametriza las consultas y las plantillas escapan la salida.
+- **¿Qué ley obliga a registrar la auditoría?** La guía del curso la pide por la Ley 21.459 de delitos informáticos; el acuerdo de datos se basa en la Ley 19.628 y sus modificaciones (Ley 21.719).

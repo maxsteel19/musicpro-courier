@@ -1,0 +1,10 @@
+{% extends "registration/base_auth.html" %}
+{% block title %}Revise su correo{% endblock %}
+{% block bajada %}Recuperar el acceso a su cuenta{% endblock %}
+{% block content %}
+<div class="text-center">
+    <i class="fas fa-envelope-circle-check fa-3x mb-3" style="color:var(--success);"></i>
+    <p>Si el correo ingresado pertenece a una cuenta, le enviamos un enlace para crear una nueva contraseña.</p>
+    <p class="small text-muted-custom mb-0">Por seguridad, el mensaje es el mismo exista o no la cuenta. Si no lo recibe en unos minutos, revise la carpeta de spam o contacte a un administrador.</p>
+</div>
+{% endblock %}

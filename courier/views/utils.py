@@ -4,6 +4,8 @@ from django.core.paginator import Paginator
 from django.db.models.deletion import ProtectedError, RestrictedError
 from django.shortcuts import redirect, render
 
+from ..auditoria import registrar
+
 POR_PAGINA = 15
 
 
@@ -34,6 +36,8 @@ def formulario_crud(request, *, form_class, titulo, url_lista, instancia=None,
             antes_de_guardar(objeto)
         objeto.save()
         form.save_m2m()
+        registrar(request, 'editar' if instancia else 'crear', objeto=objeto,
+                  descripcion=f'{objeto._meta.verbose_name.capitalize()} "{objeto}".')
         accion = 'actualizado' if instancia else 'creado'
         messages.success(request, f'Registro "{objeto}" {accion} correctamente.')
         return redirect(url_lista)
@@ -57,6 +61,7 @@ def eliminar_crud(request, *, instancia, url_lista, titulo, advertencia=''):
     """
     if request.method == 'POST':
         nombre = str(instancia)
+        modelo, pk = instancia._meta.verbose_name, instancia.pk
         try:
             instancia.delete()
         except (ProtectedError, RestrictedError) as error:
@@ -67,6 +72,8 @@ def eliminar_crud(request, *, instancia, url_lista, titulo, advertencia=''):
                 f'({", ".join(sorted(relacionados))}).',
             )
         else:
+            registrar(request, 'eliminar', modelo=modelo, objeto_id=pk,
+                      descripcion=f'{modelo.capitalize()} "{nombre}".')
             messages.success(request, f'Registro "{nombre}" eliminado correctamente.')
         return redirect(url_lista)
 

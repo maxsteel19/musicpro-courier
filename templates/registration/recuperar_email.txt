@@ -1,0 +1,14 @@
+{% autoescape off %}Hola {{ user.get_full_name|default:user.get_username }}:
+
+Recibimos una solicitud para crear una nueva contraseña en Music Pro Courier.
+Para hacerlo, abra este enlace (sirve una sola vez y vence en 1 hora):
+
+{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}
+
+Su nombre de usuario es: {{ user.get_username }}
+
+Si usted no lo solicitó, ignore este correo: su contraseña actual no cambiará.
+Nunca le pediremos su contraseña por correo ni por teléfono.
+
+Music Pro Courier
+{% endautoescape %}

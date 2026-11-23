@@ -40,6 +40,7 @@
         <div class="app-nav-section">Cuenta</div>
         {% if es_admin %}
         <a href="{% url 'courier:usuario_lista' %}" class="{% if url|slice:':7' == 'usuario' %}active{% endif %}"><i class="fas fa-users-gear"></i> Usuarios</a>
+        <a href="{% url 'courier:auditoria' %}" class="{% if url == 'auditoria' %}active{% endif %}"><i class="fas fa-clipboard-list"></i> Auditoría</a>
         {% endif %}
         <a href="{% url 'courier:perfil' %}" class="{% if url == 'perfil' or url == 'password_cambiar' %}active{% endif %}"><i class="fas fa-user-shield"></i> Mi perfil</a>
         <a href="{% url 'courier:inicio' %}"><i class="fas fa-globe"></i> Sitio público</a>
@@ -80,12 +81,13 @@
 
     <footer class="app-footer d-flex justify-content-between flex-wrap gap-2">
         <span>{{ empresa }} Courier &middot; {{ anio_actual }}</span>
-        <span>Programación Backend &middot; Evaluación 3: Aplicación web con CRUD</span>
+        <span><a href="{% url 'courier:acuerdo_datos' %}">Acuerdo de uso de datos</a> &middot; <a href="{% url 'courier:privacidad' %}">Política de privacidad</a></span>
     </footer>
 </div>
 
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
-<script>
+{# El nonce autoriza este script en línea bajo la Content-Security-Policy. #}
+<script nonce="{{ csp_nonce }}">
     (function () {
         const sidebar = document.getElementById('sidebar');
         document.getElementById('btn-sidebar').addEventListener('click', function (evento) {

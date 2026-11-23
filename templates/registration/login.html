@@ -43,10 +43,18 @@
                     </div>
                     <input type="hidden" name="next" value="{{ next }}">
                     <button type="submit" class="btn btn-primary-custom w-100 py-2"><i class="fas fa-right-to-bracket me-1"></i>Iniciar sesión</button>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'password_reset' %}" class="small text-decoration-none">¿Olvidó su contraseña?</a>
+                    </div>
                 </form>
+                <p class="small text-muted-custom mt-3 mb-0"><i class="fas fa-shield-halved me-1"></i>Por seguridad, la cuenta se bloquea temporalmente tras varios intentos fallidos. Uso exclusivo de personal autorizado.</p>
             </div>
         </div>
-        <p class="text-center mt-3"><a href="{% url 'courier:inicio' %}" class="text-muted-custom small text-decoration-none"><i class="fas fa-arrow-left me-1"></i>Volver al sitio público</a></p>
+        <p class="text-center mt-3 small">
+            <a href="{% url 'courier:inicio' %}" class="text-muted-custom text-decoration-none"><i class="fas fa-arrow-left me-1"></i>Volver al sitio público</a>
+            <span class="text-muted-custom mx-2">&middot;</span>
+            <a href="{% url 'courier:privacidad' %}" class="text-muted-custom text-decoration-none">Política de privacidad</a>
+        </p>
     </div>
 </div>
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>

@@ -2,17 +2,23 @@
 from datetime import timedelta
 from decimal import Decimal
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
 
 from courier.models import (
-    Conductor, Envio, Incidencia, Notificacion, Paquete, Sucursal,
+    Conductor, Envio, Incidencia, Notificacion, Paquete, PerfilUsuario, Sucursal,
     TipoVehiculo, Vehiculo, Viaje,
 )
 
 Usuario = get_user_model()
 CLAVE = 'ClaveSegura-2026!'
+
+
+def aceptar_acuerdo(usuario):
+    PerfilUsuario.objects.update_or_create(usuario=usuario, defaults={
+        'acuerdo_version': settings.VERSION_ACUERDO_DATOS, 'acuerdo_aceptado_en': timezone.now()})
 
 
 # Hasher rápido solo para las pruebas (en producción se usa PBKDF2).
@@ -23,6 +29,9 @@ class PruebaBase(TestCase):
         cls.admin = Usuario.objects.create_user('admin', 'admin@musicpro.cl', CLAVE, is_staff=True)
         cls.operador = Usuario.objects.create_user('operador', 'op@musicpro.cl', CLAVE)
         cls.superusuario = Usuario.objects.create_superuser('root', 'root@musicpro.cl', CLAVE)
+        # Los usuarios de prueba ya aceptaron el acuerdo de uso de datos vigente.
+        for usuario in (cls.admin, cls.operador, cls.superusuario):
+            aceptar_acuerdo(usuario)
 
         ahora = timezone.now()
         cls.santiago = Sucursal.objects.create(nombre='Sede Santiago', direccion='Av. 1', ciudad='Santiago',

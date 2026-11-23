@@ -1,0 +1,35 @@
+{% extends "registration/base_auth.html" %}
+{% block title %}Acuerdo de uso de datos{% endblock %}
+{% block ancho %}auth-card-wide{% endblock %}
+{% block encabezado %}Acuerdo de uso y confidencialidad de datos{% endblock %}
+{% block bajada %}Versión {{ version }} &middot; Lectura obligatoria para el personal de {{ empresa }}{% endblock %}
+{% block content %}
+<div class="texto-legal mb-3" tabindex="0" aria-label="Texto del acuerdo">
+    {% include "includes/texto_acuerdo_datos.html" %}
+</div>
+
+{% if ya_aceptado %}
+<div class="alert alert-success small mb-3">
+    <i class="fas fa-circle-check me-1"></i>Usted aceptó esta versión el {{ perfil.acuerdo_aceptado_en|date:"d/m/Y H:i" }}.
+</div>
+<a href="{{ next }}" class="btn btn-primary-custom w-100">Volver al sistema</a>
+{% else %}
+<form method="post" novalidate>
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    {% if error %}<div class="alert alert-danger small">{{ error }}</div>{% endif %}
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="acepto" id="acepto">
+        <label class="form-check-label small" for="acepto">
+            He leído y acepto el Acuerdo de uso y confidencialidad de datos (versión {{ version }}) y la
+            <a href="{% url 'courier:privacidad' %}" target="_blank" rel="noopener">Política de privacidad</a>.
+        </label>
+    </div>
+    <div class="d-flex flex-column flex-sm-row gap-2">
+        <button type="submit" name="decision" value="aceptar" class="btn btn-primary-custom flex-fill"><i class="fas fa-file-signature me-1"></i>Aceptar y continuar</button>
+        <button type="submit" name="decision" value="rechazar" class="btn btn-outline-custom flex-fill">No acepto (cerrar sesión)</button>
+    </div>
+</form>
+{% endif %}
+{% endblock %}
+{% block pie %}<span class="text-muted-custom">Sesión iniciada como <strong>{{ user.username }}</strong></span>{% endblock %}

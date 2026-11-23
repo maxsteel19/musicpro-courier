@@ -511,3 +511,23 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert
     .viz-cols-x span.alterno { visibility: hidden; }
     .viz-tile { padding: .85rem 1rem; }
 }
+
+/* ---- Seguridad: acuerdo de datos, privacidad y auditoría ---- */
+.auth-card.auth-card-wide { max-width: 760px; }
+.texto-legal {
+    max-height: 340px;
+    overflow-y: auto;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: .88rem;
+    line-height: 1.55;
+}
+.texto-legal ul { padding-left: 1.2rem; }
+.texto-legal:focus { outline: 2px solid var(--info); outline-offset: 2px; }
+.pagina-legal { max-width: 860px; }
+.pagina-legal h2 { font-size: 1.1rem; font-weight: 700; margin-top: 2rem; }
+.pagina-legal p, .pagina-legal li { color: var(--text-secondary); line-height: 1.65; }
+.pagina-legal strong { color: var(--text-primary); }
+.celda-detalle { max-width: 360px; white-space: normal; }

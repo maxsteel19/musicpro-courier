@@ -43,3 +43,52 @@ def normalizar_patente(valor):
     if PATENTE_ANTIGUA.match(limpio):
         return f'{limpio[:2]}-{limpio[2:]}'
     raise ValidationError('Patente inválida. Use el formato BCDF-12 o AB-1234.')
+
+
+# ---------------------------------------------------------------------------
+# Seguridad de las entradas (pauta OWASP del curso)
+# ---------------------------------------------------------------------------
+
+# Caracteres que se usan para inyectar HTML/JavaScript o comodines SQL.
+# Se permiten ' ( ) & + porque aparecen en datos reales (Av. O'Higgins,
+# teléfonos +56, "Rock & Roll"); de todas formas el ORM parametriza las
+# consultas y las plantillas escapan la salida, así que no son peligrosos.
+CARACTERES_PROHIBIDOS = '<>"\\`%'
+
+
+def validar_texto_seguro(valor, multilinea=False):
+    """Rechaza caracteres peligrosos y caracteres de control (incluido el nulo)."""
+    encontrados = sorted({c for c in valor if c in CARACTERES_PROHIBIDOS})
+    if encontrados:
+        raise ValidationError(
+            'No se permiten los caracteres %(lista)s.',
+            code='caracteres_prohibidos', params={'lista': ' '.join(encontrados)},
+        )
+    permitidos = '\n\r\t' if multilinea else ''
+    if any((ord(c) < 32 and c not in permitidos) or ord(c) == 127 for c in valor):
+        raise ValidationError('El texto contiene caracteres de control no permitidos.', code='caracteres_control')
+
+
+class ComplejidadPasswordValidator:
+    """Exige combinar letras, números y símbolos en la contraseña.
+
+    Complementa a los validadores de Django (largo mínimo, contraseñas
+    comunes, solo números y similitud con el usuario).
+    """
+
+    def validate(self, password, user=None):
+        faltan = []
+        if not re.search(r'[^\W\d_]', password):
+            faltan.append('una letra')
+        if not re.search(r'\d', password):
+            faltan.append('un número')
+        if not re.search(r'[^\w\s]|_', password):
+            faltan.append('un símbolo (por ejemplo ! # $ - _)')
+        if faltan:
+            raise ValidationError(
+                'La contraseña debe contener al menos %(faltan)s.',
+                code='password_sin_complejidad', params={'faltan': ', '.join(faltan)},
+            )
+
+    def get_help_text(self):
+        return 'La contraseña debe combinar letras, números y al menos un símbolo.'

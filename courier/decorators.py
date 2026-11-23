@@ -21,6 +21,10 @@ def administrador_requerido(vista):
     @login_required
     def _vista_protegida(request, *args, **kwargs):
         if not es_administrador(request.user):
+            # Se deja constancia del intento de escalar privilegios.
+            from .auditoria import registrar
+            registrar(request, 'acceso_denegado',
+                      descripcion=f'Intentó entrar a {request.path} sin rol de administrador.')
             raise PermissionDenied('Solo los administradores pueden acceder a esta sección.')
         return vista(request, *args, **kwargs)
 

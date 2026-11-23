@@ -9,6 +9,7 @@
 {% else %}
 <label class="form-label" for="{{ campo.id_for_label }}">{{ campo.label }}{% if campo.field.required %} <span style="color:var(--primary);">*</span>{% endif %}</label>
 {{ campo }}
-{% if campo.help_text %}<div class="form-text">{{ campo.help_text|safe }}</div>{% endif %}
+{# Sin |safe: los textos de ayuda de Django ya vienen marcados como seguros y el resto se escapa. #}
+{% if campo.help_text %}<div class="form-text">{{ campo.help_text }}</div>{% endif %}
 {% for error in campo.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
 {% endif %}

@@ -1,0 +1,72 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de privacidad | {{ empresa }} Courier</title>
+    <link href="{% static 'vendor/bootstrap/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'vendor/fontawesome/css/all.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/app.css' %}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-public sticky-top">
+    <div class="container flex-nowrap">
+        <a class="navbar-brand d-flex align-items-center gap-2 text-white fw-bold" href="{% url 'courier:inicio' %}">
+            <span class="app-brand-icon"><i class="fas fa-truck-fast text-white"></i></span>{{ empresa }}<span class="d-none d-sm-inline"> Courier</span>
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'courier:dashboard' %}" class="btn btn-primary-custom"><i class="fas fa-gauge-high me-1"></i>Ir al panel</a>
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-primary-custom"><i class="fas fa-right-to-bracket me-1"></i>Iniciar sesión</a>
+        {% endif %}
+    </div>
+</nav>
+
+<main class="container py-5 pagina-legal">
+    <span class="badge-estado estado-info mb-3">Versión {{ version }}</span>
+    <h1 class="fw-bold mb-3">Política de privacidad y uso de datos</h1>
+    <p>Esta política explica qué datos personales trata el sistema <strong>{{ empresa }} Courier</strong>, para qué los usa, cómo los protege y qué derechos tienen las personas a las que pertenecen.</p>
+
+    <h2>1. Responsable</h2>
+    <p>El responsable del tratamiento es {{ empresa }}, que usa este sistema para gestionar el traslado de instrumentos entre sus sucursales.</p>
+
+    <h2>2. Qué datos tratamos</h2>
+    <ul>
+        <li><strong>Personal que usa el sistema:</strong> nombre, nombre de usuario, correo y contraseña (solo se guarda su hash, nunca la contraseña). También la fecha, la dirección IP y el navegador de cada inicio de sesión y de cada cambio realizado.</li>
+        <li><strong>Conductores:</strong> nombre, RUT, clase de licencia y teléfono. El RUT y el teléfono se guardan <strong>cifrados</strong> en la base de datos.</li>
+        <li><strong>Sucursales y envíos:</strong> datos de contacto de las sucursales e información de paquetes, envíos y viajes.</li>
+    </ul>
+
+    <h2>3. Para qué los usamos</h2>
+    <p>Solo para planificar y hacer seguimiento de envíos y viajes, administrar las cuentas del personal y proteger la seguridad del sistema. Los datos <strong>no se venden</strong> ni se usan con fines publicitarios.</p>
+
+    <h2>4. Quién puede verlos</h2>
+    <p>Solo personal autorizado, según su rol: los <strong>operadores</strong> gestionan envíos y transporte; los <strong>administradores</strong> además gestionan usuarios y revisan la bitácora de auditoría. Antes de usar el sistema, cada persona debe aceptar el <em>Acuerdo de uso y confidencialidad de datos</em>. No compartimos datos con terceros, salvo cuando una ley o una autoridad competente lo exija.</p>
+
+    <h2>5. Cómo los protegemos</h2>
+    <ul>
+        <li>Contraseñas guardadas con hash (PBKDF2) y que deben combinar letras, números y símbolos.</li>
+        <li>Bloqueo temporal de la cuenta tras {{ max_intentos }} intentos fallidos de inicio de sesión.</li>
+        <li>Sesiones que vencen por inactividad y al cerrar el navegador.</li>
+        <li>Cifrado de los datos personales sensibles en la base de datos y conexión cifrada (HTTPS) en producción.</li>
+        <li>Control de acceso por roles y registro de auditoría de accesos y cambios.</li>
+    </ul>
+
+    <h2>6. Cookies</h2>
+    <p>El sistema usa solo cookies técnicas necesarias: la de sesión (para mantenerle conectado) y la de protección contra falsificación de formularios (CSRF). No usamos cookies de publicidad ni de seguimiento.</p>
+
+    <h2>7. Cuánto tiempo los guardamos</h2>
+    <p>Mientras se necesiten para la finalidad indicada o mientras lo exija la ley. Los registros de auditoría se conservan el tiempo necesario para investigar incidentes de seguridad.</p>
+
+    <h2>8. Sus derechos</h2>
+    <p>De acuerdo con la Ley N.º 19.628 sobre protección de la vida privada y sus modificaciones (Ley N.º 21.719), usted puede pedir <strong>acceso</strong> a sus datos, su <strong>rectificación</strong>, <strong>supresión</strong> u <strong>oposición</strong> a su tratamiento, además de su <strong>portabilidad</strong> y <strong>bloqueo</strong> cuando corresponda. Para ejercerlos, contacte al administrador del sistema de {{ empresa }}.</p>
+
+    <h2>9. Cambios a esta política</h2>
+    <p>Si esta política o el acuerdo de uso de datos cambian, se publicará una nueva versión y el sistema pedirá al personal aceptarla de nuevo.</p>
+
+    <p class="mt-4"><a href="{% url 'courier:inicio' %}"><i class="fas fa-arrow-left me-1"></i>Volver al sitio público</a></p>
+</main>
+
+<footer class="app-footer text-center">{{ empresa }} Courier &middot; {{ anio_actual }} &middot; Programación Backend</footer>
+</body>
+</html>

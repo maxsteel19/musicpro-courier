@@ -46,9 +46,18 @@
                 <td><small>{{ u.email|default:"—" }}</small></td>
                 <td>{% if u.is_superuser %}<span class="badge-estado bg-soft-purple">Superusuario</span>{% elif u.is_staff %}<span class="badge-estado estado-info">Administrador</span>{% else %}<span class="badge-estado badge-baja">Operador</span>{% endif %}</td>
                 <td><small>{{ u.last_login|date:"d/m/Y H:i"|default:"Nunca" }}</small></td>
-                <td>{% if u.is_active %}<span class="badge-estado estado-ok">Activo</span>{% else %}<span class="badge-estado estado-bad">Inactivo</span>{% endif %}</td>
+                <td>
+                    {% if u.is_active %}<span class="badge-estado estado-ok">Activo</span>{% else %}<span class="badge-estado estado-bad">Inactivo</span>{% endif %}
+                    {% if u.username|lower in bloqueados %}<span class="badge-estado estado-bad" title="Bloqueada por intentos fallidos"><i class="fas fa-lock me-1"></i>Bloqueada</span>{% endif %}
+                </td>
                 <td>
                     <div class="d-flex gap-1 justify-content-end">
+                        {% if u.username|lower in bloqueados %}
+                        <form method="post" action="{% url 'courier:usuario_desbloquear' u.pk %}" class="m-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-custom btn-icon" title="Desbloquear"><i class="fas fa-lock-open"></i></button>
+                        </form>
+                        {% endif %}
                         <a href="{% url 'courier:usuario_editar' u.pk %}" class="btn btn-outline-custom btn-icon" title="Editar"><i class="fas fa-pen"></i></a>
                         <a href="{% url 'courier:usuario_password' u.pk %}" class="btn btn-outline-custom btn-icon" title="Cambiar contraseña"><i class="fas fa-key"></i></a>
                         {% if u.pk != user.pk %}

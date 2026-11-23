@@ -1,0 +1,15 @@
+{% extends "registration/base_auth.html" %}
+{% block title %}Recuperar contraseña{% endblock %}
+{% block bajada %}Recuperar el acceso a su cuenta{% endblock %}
+{% block content %}
+<p class="small text-muted-custom">Ingrese el correo registrado en su cuenta. Si existe, le enviaremos un enlace para crear una nueva contraseña. El enlace sirve una sola vez y vence en 1 hora.</p>
+<form method="post" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label" for="{{ form.email.id_for_label }}">Correo electrónico</label>
+        {{ form.email }}
+        {% for error in form.email.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+    <button type="submit" class="btn btn-primary-custom w-100 py-2"><i class="fas fa-envelope me-1"></i>Enviar enlace de recuperación</button>
+</form>
+{% endblock %}

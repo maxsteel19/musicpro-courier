@@ -374,7 +374,9 @@ def conductor_lista(request):
     ).order_by('nombre')
     q = request.GET.get('q', '').strip()
     if q:
-        conductores = conductores.filter(Q(nombre__icontains=q) | Q(rut__icontains=q) | Q(licencia__icontains=q))
+        # El RUT está cifrado en la base: se busca por RUT completo (con o sin puntos) usando su huella.
+        por_rut = Conductor.objects.con_rut(q).values('pk')
+        conductores = conductores.filter(Q(nombre__icontains=q) | Q(licencia__icontains=q) | Q(pk__in=por_rut))
     estado = request.GET.get('estado', '')
     if estado in ('activo', 'inactivo'):
         conductores = conductores.filter(activo=(estado == 'activo'))

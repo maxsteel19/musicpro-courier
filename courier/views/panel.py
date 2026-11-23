@@ -10,7 +10,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 
 from .. import graficos
-from ..models import Conductor, Envio, Incidencia, Paquete, Sucursal, TipoVehiculo, Vehiculo, Viaje
+from ..models import (
+    Conductor, Envio, Incidencia, Paquete, PerfilUsuario, Sucursal, TipoVehiculo, Vehiculo, Viaje,
+)
 from ..reportes import MESES
 
 
@@ -272,6 +274,7 @@ def perfil(request):
         'expira': sesion.get_expiry_date(),
         'expira_al_cerrar': sesion.get_expire_at_browser_close(),
         'grupos': request.user.groups.values_list('name', flat=True),
+        'perfil_seguridad': PerfilUsuario.de(request.user),
     })
 
 

@@ -200,24 +200,27 @@ erDiagram
 ```text
 musicpro/                 Configuración del proyecto (settings, urls, wsgi)
 courier/
-    models.py             Modelos del courier y del transporte
-    forms.py              ModelForms con validaciones (RUT, patente, fechas)
-    validators.py         Validación de RUT (módulo 11) y patentes chilenas
-    decorators.py         @administrador_requerido
-    middleware.py         Sin caché para usuarios autenticados
+    models.py             Modelos del courier, del transporte y de seguridad (perfil, bloqueos, auditoría)
+    entradas.py           Formularios propios: HTML escapado y validación en el servidor
+    validators.py         RUT (módulo 11), patentes, caracteres peligrosos y complejidad de contraseñas
+    cifrado.py            Campo cifrado (Fernet) y huella HMAC para datos personales
+    auditoria.py          Bitácora de seguridad (quién, qué, cuándo, IP)
+    signals.py            Registro de inicios y cierres de sesión en la bitácora
+    decorators.py         @administrador_requerido (registra los accesos denegados)
+    middleware.py         Sin caché para usuarios autenticados; acuerdo de datos y clave temporal
     reportes.py           Las 20 consultas ORM del informe
     graficos.py           Datos de los gráficos (proporciones, escalas, variaciones)
     views/
-        publico.py        Página pública
-        cuentas.py        Login, logout y cambio de contraseña
+        publico.py        Página pública y política de privacidad
+        cuentas.py        Login con bloqueo, logout, contraseñas, recuperación y acuerdo de datos
         panel.py          Dashboard, seguimiento, perfil y JSON
         gestion.py        CRUD de las 9 entidades
-        usuarios.py       Mantenedor de usuarios
+        usuarios.py       Mantenedor de usuarios y bitácora de auditoría
         reportes.py       Página de reportes (resultado + código + SQL)
         utils.py          Paginación y helpers de crear/editar/eliminar
     management/commands/seed_courier.py   Datos de prueba con Faker
     migrations/
-    tests/                Pruebas automáticas (60)
+    tests/                Pruebas automáticas (95)
 templates/                Plantillas (base con menú lateral, CRUD, reportes)
 static/                   CSS, JS (tooltips) y librerías locales (Bootstrap, Font Awesome)
 docs/GUIA_DEFENSA.md      Guía para explicar el proyecto en la defensa
@@ -275,6 +278,18 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 ```
 
+Agregue también la clave que cifra los datos personales (RUT y teléfono de los conductores):
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+```ini
+DJANGO_CLAVE_CIFRADO=la-clave-generada
+```
+
+> **No pierda ni cambie esta clave**: los datos ya cifrados solo se pueden leer con ella.
+
 El archivo `.env` está en `.gitignore`: las claves nunca se suben a GitHub.
 
 ### 5.5 Migrar, cargar datos y crear el administrador
@@ -292,6 +307,10 @@ python manage.py runserver
 
 `seed_courier` carga 8 sucursales, 5 tipos de vehículo, 22 vehículos, 16 conductores, unos 650 viajes repartidos en los últimos 14 meses, 300 paquetes, 300 envíos, incidencias y notificaciones. Use `python manage.py seed_courier --limpiar` para regenerarlos.
 
+Al entrar por primera vez, cada usuario debe aceptar el **acuerdo de uso de datos**. Los usuarios que crea un administrador reciben una **contraseña temporal** y deben cambiarla en su primer ingreso.
+
+En desarrollo, el correo de recuperación de contraseña se muestra en la consola donde corre `runserver` (copie el enlace desde ahí). Para enviarlo de verdad, configure SMTP en `.env` (ver `.env.example`).
+
 ### 5.6 Roles
 
 | Rol | Cómo se obtiene | Acceso |
@@ -308,9 +327,13 @@ python manage.py runserver
 python manage.py test courier
 ```
 
-Son 60 pruebas que verifican, entre otras cosas:
+Son 95 pruebas que verifican, entre otras cosas:
 
 - login correcto e incorrecto, usuario desactivado, parámetro `next` seguro y cambio de id de sesión,
+- el bloqueo tras los intentos fallidos (también para usuarios inexistentes), el desbloqueo y la recuperación de contraseña de punta a punta,
+- la política de contraseñas, las claves temporales y el acuerdo de uso de datos,
+- el rechazo de caracteres peligrosos, tipos, largos y opciones inválidas, y que los formularios escapen el HTML (XSS),
+- que el RUT y el teléfono se guardan cifrados, la bitácora de auditoría y las cabeceras de seguridad (CSP),
 - que **todas** las URLs privadas redirigen al login sin sesión, y que un POST sin sesión no modifica la base,
 - que el logout solo acepta POST y quita el acceso,
 - la mantención de usuarios y sus restricciones (operador = 403, no auto-desactivarse, etc.),
@@ -321,11 +344,45 @@ Son 60 pruebas que verifican, entre otras cosas:
 
 Para correrlas sin MySQL (por ejemplo, en otro computador): `set DB_ENGINE=sqlite` y luego el mismo comando.
 
+**Cobertura de código** (la guía pide más de 80 %):
+
+```bash
+pip install -r requirements-dev.txt
+coverage run manage.py test courier
+coverage report
+```
+
+**Integración continua:** `.github/workflows/pruebas.yml` ejecuta las pruebas y mide la cobertura en GitHub Actions en cada `push` y cada pull request.
+
 ---
 
 ## 7. Seguridad aplicada
 
-- Contraseñas guardadas con hash (PBKDF2 de Django) y validadores de largo mínimo, contraseñas comunes, solo números y similitud con el usuario.
+### 7.1 Puntos que se revisan en la demostración del prototipo
+
+| Punto | Qué tiene la aplicación | Dónde verlo |
+|---|---|---|
+| **Acceso** (usuario, contraseña, intentos, recuperación) | Login de Django; bloqueo de 15 minutos tras 5 intentos fallidos (el mensaje avisa cuántos quedan); "¿Olvidó su contraseña?" con enlace de un solo uso que vence en 1 hora; claves temporales que se deben cambiar al entrar; contraseñas con letras, números y símbolos | `/cuentas/login/`, `/cuentas/recuperar/` |
+| **Roles** (al menos 2) | Superusuario, Administrador y Operador. El operador recibe 403 en usuarios y auditoría | Menú lateral, `/usuarios/` |
+| **Diseño de interfaz y servicios** | Panel, seguimiento, 9 mantenedores, reportes; diseño responsive | `/panel/` |
+| **Validación de entradas** | En el servidor: caracteres peligrosos (`<` `>` `"` `\` `%` y comilla invertida), tipos, largos, rangos, opciones válidas y valores únicos. Errores claros, nunca un error 500 | Cualquier formulario |
+| **Mantenedores en la propia aplicación** | CRUD de 9 entidades y de usuarios (sin Django Admin) | Menú lateral |
+| **Control de sesiones** | Vence a la hora de inactividad y al cerrar el navegador; id renovado al entrar; logout solo por POST; "Atrás" no muestra datos | **Mi perfil** |
+| **Protección de datos confidenciales** | Contraseñas con hash PBKDF2; RUT y teléfono de conductores **cifrados** en MySQL; credenciales en `.env`; HTTPS obligatorio en producción | Tabla `courier_conductor` en MySQL Workbench |
+| **Acuerdos de uso de datos** | Acuerdo de confidencialidad que cada usuario acepta al entrar (se guarda versión, fecha e IP) y política de privacidad pública | `/acuerdo-datos/`, `/privacidad/` |
+| **Seguridad de la aplicación** | Bitácora de auditoría (Ley 21.459), XSS bloqueado, CSRF, CSP, sin caché privada, ORM parametrizado | `/auditoria/` |
+
+### 7.2 Medidas aplicadas
+
+- **Bloqueo por intentos fallidos:** tras `LOGIN_MAX_INTENTOS` (5) errores, la cuenta queda bloqueada `LOGIN_MINUTOS_BLOQUEO` (15) minutos. Se cuenta por nombre de usuario aunque la cuenta no exista, con el mismo mensaje, para no revelar qué usuarios existen. Un administrador puede desbloquearla antes, y recuperar la contraseña también la desbloquea.
+- **Recuperación de contraseña:** enlace firmado de un solo uso que vence en 1 hora. La respuesta es la misma exista o no el correo.
+- **Contraseñas temporales:** si un administrador crea un usuario o le asigna una clave, el usuario debe cambiarla antes de usar el sistema.
+- **Validación y XSS:** los formularios propios (`courier/entradas.py`) arman el HTML con `format_html`, que escapa cada valor, y validan todo en el servidor. Las contraseñas nunca se vuelven a escribir en la página.
+- **Cifrado de datos personales:** el RUT y el teléfono de los conductores se guardan cifrados con Fernet (AES + HMAC). Para exigir RUT único y buscar por RUT se usa una huella HMAC-SHA256, así el RUT nunca queda en claro en la base.
+- **Bitácora de auditoría:** registra inicios de sesión, intentos fallidos, bloqueos, accesos denegados, cambios de contraseña y cada creación, modificación o eliminación, con usuario, fecha e IP. Es de solo lectura.
+- **Acuerdo de uso de datos:** cada usuario debe aceptarlo antes de usar el sistema. Si se cambia el texto, se sube `VERSION_ACUERDO_DATOS` y todos deben aceptarlo de nuevo.
+- **Content-Security-Policy:** el navegador solo ejecuta scripts del propio sitio; el único script en línea lleva un `nonce`.
+- Contraseñas guardadas con hash (PBKDF2 de Django) y validadores de largo mínimo, contraseñas comunes, solo números, similitud con el usuario y combinación de letras, números y símbolos.
 - Protección **CSRF** en todos los formularios. El logout y la desactivación de usuarios solo aceptan POST.
 - Al iniciar sesión, Django **renueva el id de sesión** (evita la fijación de sesión).
 - Sesión con expiración por inactividad (1 hora) y al cerrar el navegador. Cookies `HttpOnly` y `SameSite=Lax`, y `Secure` cuando `DEBUG=False`.
@@ -349,7 +406,9 @@ Se usó un asistente de IA (Claude) para analizar el enunciado, proponer la estr
 | Credenciales en variables de entorno / `.env` | Aplicada, con un lector de `.env` sin dependencias extra |
 | Usar `PROTECT` en las claves foráneas en vez de `CASCADE` | Aplicada: evita borrar envíos al eliminar una sucursal |
 | Usar `__date` / `TruncMonth` para agrupar por fecha | **Descartada**: en MySQL sin tablas de zona horaria devuelven `NULL`. Se reemplazó por rangos `__gte/__lt` y agregación condicional |
-| Bloquear cuentas tras varios intentos fallidos de login (`django-axes`) | **No aplicada**: suma una dependencia y configuración fuera del alcance. Queda como mejora futura |
+| Bloquear cuentas tras varios intentos fallidos de login | **Aplicada sin dependencias extra** (modelo `BloqueoAcceso`). Se eligió un bloqueo temporal y no desactivar la cuenta: así un atacante no puede dejar fuera a un usuario de forma permanente |
+| Rechazar todos los caracteres "peligrosos" de la pauta (`< > " ' % ( ) & + \`) | **Aplicada en parte**: se rechazan `<` `>` `"` `\` `%`, la comilla invertida y los caracteres de control. Se permiten `' ( ) & +` porque aparecen en datos reales (Av. O'Higgins, +56, Rock & Roll); el ORM y el escape de las plantillas los neutralizan |
+| Cifrar datos personales en la base | Aplicada al RUT y teléfono de conductores. El RUT se busca por huella HMAC, por lo que la búsqueda por RUT exige el RUT completo |
 | Usar vistas basadas en clases genéricas para todo el CRUD | **Descartada** en favor de funciones con decoradores, que dejan explícito el control de acceso que pide la pauta |
 
 ---

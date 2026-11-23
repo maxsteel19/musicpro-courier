@@ -1,0 +1,12 @@
+[run]
+source = courier, musicpro
+omit =
+    */migrations/*
+    */tests/*
+    musicpro/wsgi.py
+    courier/management/*
+
+[report]
+show_missing = True
+skip_covered = False
+fail_under = 80

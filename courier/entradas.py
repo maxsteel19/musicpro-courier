@@ -1,21 +1,36 @@
-"""Formularios del administrador propio sin usar django.forms."""
+"""Formularios del administrador propio sin usar django.forms.
+
+Seguridad de las entradas (pauta OWASP del curso):
+
+- Todo el HTML de los campos se arma con ``format_html``/``flatatt``, que
+  escapan los valores. Así un dato como ``<script>`` se muestra como texto y
+  nunca se ejecuta (evita XSS).
+- Cada valor se valida en el servidor: caracteres peligrosos, tipo de dato,
+  largo máximo, rangos, opciones válidas y valores únicos. Si algo falla, el
+  dato se rechaza y se informa al usuario (no se produce un error 500).
+"""
 from collections import OrderedDict
 from datetime import date, datetime
 from types import SimpleNamespace
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import FieldDoesNotExist
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import models
 from django.db.models import Q
+from django.forms.utils import flatatt
 from django.utils import timezone
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html, format_html_join
 
+from .cifrado import CampoCifrado
 from .models import (
     Conductor, Envio, Incidencia, Notificacion, Paquete, Sucursal,
     TipoVehiculo, Vehiculo, Viaje,
 )
-from .validators import normalizar_patente, normalizar_rut
+from .validators import normalizar_patente, normalizar_rut, validar_texto_seguro
+
+VALORES_VERDADEROS = (True, 'on', 'true', 'True', '1', 'yes')
 
 Usuario = get_user_model()
 
@@ -57,23 +72,53 @@ class ManualField:
         self.field = SimpleNamespace(required=required, widget=self.widget)
         self.id_for_label = name
 
+    def _valor_para_html(self):
+        """Convierte el valor al formato que espera cada tipo de input."""
+        valor = self.value
+        if valor in (None, ''):
+            return ''
+        if hasattr(valor, 'pk'):
+            return valor.pk
+        if self.widget.input_type == 'datetime-local' and isinstance(valor, datetime):
+            if timezone.is_aware(valor):
+                valor = timezone.localtime(valor)
+            return valor.strftime('%Y-%m-%dT%H:%M')
+        if self.widget.input_type == 'date' and isinstance(valor, (date, datetime)):
+            return valor.strftime('%Y-%m-%d')
+        return valor
+
     def __str__(self):
-        if self.widget.input_type == 'checkbox':
-            checked = ' checked' if self.value in (True, 'on', 'True', 'true', '1') else ''
-            return mark_safe(f'<input type="checkbox" name="{self.name}" id="{self.id_for_label}" class="form-check-input"{checked}>')
-        if self.widget.input_type == 'select':
-            options = []
-            for option_value, option_label in self.choices:
-                selected = ' selected' if str(self.value) == str(option_value) else ''
-                options.append(f'<option value="{option_value}"{selected}>{option_label}</option>')
-            return mark_safe(f'<select name="{self.name}" id="{self.id_for_label}" class="form-select">{"".join(options)}</select>')
-        attrs = [f'name="{self.name}"', f'id="{self.id_for_label}"', 'class="form-control"']
-        if self.widget.attrs:
-            for clave, valor in self.widget.attrs.items():
-                attrs.append(f'{clave}="{valor}"')
-        if self.value not in (None, ''):
-            attrs.append(f'value="{self.value}"')
-        return mark_safe(f'<input type="{self.widget.input_type}" {" ".join(attrs)}>')
+        # flatatt y format_html escapan cada valor: < > " ' & nunca llegan
+        # al navegador como HTML ejecutable.
+        tipo = self.widget.input_type
+        attrs = {'name': self.name, 'id': self.id_for_label, 'disabled': self.disabled}
+        if tipo == 'checkbox':
+            attrs.update({'type': 'checkbox', 'class': 'form-check-input',
+                          'checked': self.value in VALORES_VERDADEROS})
+            return format_html('<input{}>', flatatt(attrs))
+
+        valor = self._valor_para_html()
+        if tipo == 'select':
+            attrs['class'] = 'form-select'
+            opciones = list(self.choices)
+            if not self.required:
+                opciones.insert(0, ('', '---------'))
+            return format_html(
+                '<select{}>{}</select>', flatatt(attrs),
+                format_html_join('', '<option value="{}"{}>{}</option>', (
+                    (clave, ' selected' if str(valor) == str(clave) else '', etiqueta)
+                    for clave, etiqueta in opciones
+                )),
+            )
+
+        attrs.update({'class': 'form-control', **self.widget.attrs})
+        if tipo == 'textarea':
+            return format_html('<textarea{}>{}</textarea>', flatatt(attrs), valor)
+        attrs['type'] = tipo
+        if tipo != 'password' and valor != '':
+            # Las contraseñas nunca se vuelven a escribir en la página.
+            attrs['value'] = valor
+        return format_html('<input{}>', flatatt(attrs))
 
 
 class BaseEntradaManual:
@@ -82,6 +127,9 @@ class BaseEntradaManual:
     help_texts = {}
     widgets = {}
     model = None
+    # Modelo cuyas reglas (largo, formato, unicidad) se usan para validar
+    # cuando el formulario no edita directamente un registro (crear usuario).
+    modelo_validacion = None
 
     def __init__(self, data=None, instance=None, **kwargs):
         self.data = data or {}
@@ -94,7 +142,13 @@ class BaseEntradaManual:
         self._hydrate_from_instance_or_initial()
         if self.data:
             for nombre, campo in self.fields.items():
-                campo.value = self.data.get(nombre, campo.value)
+                if campo.disabled:
+                    continue  # un campo bloqueado nunca toma el valor enviado
+                if campo.widget.input_type == 'checkbox':
+                    # Una casilla desmarcada no viaja en el POST: su ausencia es "False".
+                    campo.value = self.data.get(nombre) in VALORES_VERDADEROS
+                else:
+                    campo.value = self.data.get(nombre, campo.value)
         self._normalize_values()
 
     def _build_fields(self):
@@ -110,18 +164,34 @@ class BaseEntradaManual:
             campo = self.model._meta.get_field(nombre)
             if isinstance(campo, models.BooleanField):
                 widget = ManualWidget('checkbox')
-            elif isinstance(campo, models.DateField):
-                widget = ManualWidget('date')
             elif isinstance(campo, models.DateTimeField):
                 widget = ManualWidget('datetime-local')
+            elif isinstance(campo, models.DateField):
+                widget = ManualWidget('date')
+            elif isinstance(campo, CampoCifrado):
+                widget = ManualWidget('text')
             elif isinstance(campo, models.TextField):
                 widget = ManualWidget('textarea', {'rows': 3})
             elif hasattr(campo, 'remote_field') and campo.remote_field is not None:
                 widget = ManualWidget('select')
+            elif getattr(campo, 'choices', None):
+                widget = ManualWidget('select')
+            elif isinstance(campo, (models.IntegerField, models.DecimalField, models.FloatField)):
+                paso = '1' if isinstance(campo, models.IntegerField) else 'any'
+                widget = ManualWidget('number', {'step': paso})
             else:
                 widget = ManualWidget('text')
         elif widget is None:
             widget = ManualWidget('text')
+        # Límite de largo también en el navegador (el servidor lo vuelve a validar).
+        modelo = self.model or self.modelo_validacion
+        if modelo is not None and widget.input_type in ('text', 'email', 'textarea'):
+            try:
+                largo = modelo._meta.get_field(nombre).max_length
+            except FieldDoesNotExist:
+                largo = None
+            if largo:
+                widget = ManualWidget(widget.input_type, {**widget.attrs, 'maxlength': largo})
         return ManualField(name=nombre, label=label, required=self._field_required(nombre),
                            help_text=help_text, initial=self.initial.get(nombre), widget=widget,
                            choices=self._field_choices(nombre), queryset=self._field_queryset(nombre),
@@ -155,8 +225,12 @@ class BaseEntradaManual:
         for nombre, campo in self.fields.items():
             if self.instance is not None and hasattr(self.instance, nombre):
                 valor = getattr(self.instance, nombre)
-            else:
+            elif nombre in self.initial:
                 valor = self.initial.get(nombre)
+            else:
+                # Registro nuevo: se propone el valor por defecto del modelo (p. ej. "Activa").
+                campo_modelo = self._campo_modelo(nombre) if self.model is not None else None
+                valor = campo_modelo.get_default() if campo_modelo is not None and campo_modelo.has_default() else None
             campo.value = valor
 
     def _normalize_values(self):
@@ -189,6 +263,39 @@ class BaseEntradaManual:
     def errors(self):
         return {'__all__': self._non_field_errors}
 
+    def _campo_modelo(self, nombre):
+        modelo = self.model or self.modelo_validacion
+        if modelo is None:
+            return None
+        try:
+            return modelo._meta.get_field(nombre)
+        except FieldDoesNotExist:
+            return None
+
+    def _validar_con_modelo(self, campo, campo_modelo, valor):
+        """Aplica las reglas del modelo: tipo, largo, rangos, opciones y unicidad."""
+        if campo_modelo.is_relation:
+            try:
+                return campo_modelo.remote_field.model._default_manager.get(pk=valor)
+            except (campo_modelo.remote_field.model.DoesNotExist, ValueError, TypeError):
+                campo.errors.append('Seleccione una opción válida.')
+                return valor
+        try:
+            valor = campo_modelo.clean(valor, self.instance)
+        except DjangoValidationError as exc:
+            campo.errors.extend(exc.messages)
+            return valor
+        if isinstance(valor, datetime) and timezone.is_naive(valor):
+            valor = timezone.make_aware(valor)
+        if campo_modelo.unique and not campo_modelo.primary_key and not isinstance(campo_modelo, CampoCifrado):
+            filtro = f'{campo_modelo.name}__iexact' if isinstance(valor, str) else campo_modelo.name
+            repetidos = campo_modelo.model._default_manager.filter(**{filtro: valor})
+            if self.instance is not None and self.instance.pk:
+                repetidos = repetidos.exclude(pk=self.instance.pk)
+            if repetidos.exists():
+                campo.errors.append(f'Ya existe un registro con este valor de "{campo.label}".')
+        return valor
+
     def is_valid(self):
         self.cleaned_data = {}
         self._non_field_errors = []
@@ -198,27 +305,27 @@ class BaseEntradaManual:
             valor = campo.value
             if valor is None:
                 valor = ''
-            if campo.widget.input_type == 'checkbox':
-                valor = valor in (True, 'on', 'true', 'True', '1', 'yes')
-            es_requerido = campo.required and not (campo.widget.input_type == 'checkbox' and valor is False)
+            tipo = campo.widget.input_type
+            if tipo == 'checkbox':
+                valor = valor in VALORES_VERDADEROS
+            elif isinstance(valor, str) and tipo != 'password':
+                valor = valor.strip()
+                try:
+                    validar_texto_seguro(valor, multilinea=(tipo == 'textarea'))
+                except DjangoValidationError as exc:
+                    campo.errors.extend(exc.messages)
+            es_requerido = campo.required and tipo != 'checkbox'
             if es_requerido and valor in ('', None):
                 campo.errors.append('Este campo es obligatorio.')
+            campo_modelo = self._campo_modelo(nombre)
+            if campo_modelo is not None and not campo.errors and valor not in ('', None) and tipo != 'checkbox':
+                valor = self._validar_con_modelo(campo, campo_modelo, valor)
+            if campo.errors:
                 valid = False
-            if self.model is not None:
-                try:
-                    campo_modelo = self.model._meta.get_field(nombre)
-                except Exception:
-                    campo_modelo = None
-                if campo_modelo is not None and hasattr(campo_modelo, 'remote_field') and campo_modelo.remote_field is not None and valor not in ('', None):
-                    try:
-                        valor = campo_modelo.remote_field.model.objects.get(pk=valor)
-                    except Exception:
-                        pass
-            if valor not in ('', None):
+                self._non_field_errors.extend(campo.errors)
+            elif valor not in ('', None):
                 self.cleaned_data[nombre] = valor
             campo.value = valor
-            if campo.errors:
-                self._non_field_errors.extend(campo.errors)
         return valid
 
     def save(self, commit=True):
@@ -265,7 +372,12 @@ class BaseModeloEntradaManual(BaseEntradaManual):
 
 
 class EstiloBootstrapMixin:
-    """No-op para compatibilidad con el proyecto."""
+    """Agrega la clase de Bootstrap a los formularios de ``django.contrib.auth``."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for campo in self.fields.values():
+            campo.widget.attrs.setdefault('class', 'form-control')
 
 
 class DatosSucursal(BaseModeloEntradaManual):
@@ -389,7 +501,8 @@ class DatosConductor(BaseModeloEntradaManual):
                 self.add_error('rut', str(exc))
                 ok = False
             else:
-                existente = Conductor.objects.filter(rut=rut).exclude(pk=getattr(self.instance, 'pk', None))
+                # El RUT está cifrado: la búsqueda se hace por su huella (HMAC).
+                existente = Conductor.objects.con_rut(rut).exclude(pk=getattr(self.instance, 'pk', None))
                 if existente.exists():
                     self.add_error('rut', 'Ya existe un conductor con este RUT.')
                     ok = False
@@ -446,12 +559,14 @@ AYUDAS_USUARIO = {'username': 'Hasta 150 caracteres: letras, números y @/./+/-/
 class DatosCrearUsuario(BaseEntradaManual):
     form_fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2', 'is_staff', 'is_active']
     labels = ETIQUETAS_USUARIO
-    help_texts = AYUDAS_USUARIO
+    help_texts = {**AYUDAS_USUARIO, 'password1': 'Contraseña temporal: el usuario deberá cambiarla al ingresar por primera vez.'}
     widgets = {'is_staff': ManualWidget('checkbox'), 'is_active': ManualWidget('checkbox'), 'password1': ManualWidget('password'), 'password2': ManualWidget('password')}
+    modelo_validacion = Usuario
 
     def __init__(self, data=None, instance=None, **kwargs):
         super().__init__(data=data, instance=instance, **kwargs)
-        self.fields['is_active'].value = True
+        if not self.data:
+            self.fields['is_active'].value = True  # valor sugerido al abrir el formulario
 
     def is_valid(self):
         ok = super().is_valid()
@@ -492,10 +607,11 @@ class DatosEditarUsuario(BaseEntradaManual):
         self.editor = editor
         super().__init__(data=data, instance=instance, **kwargs)
         if editor is not None and editor.pk == getattr(instance, 'pk', None):
-            self.fields['is_staff'].disabled = True
-            self.fields['is_active'].disabled = True
-            self.fields['is_staff'].help_text = 'No puede modificar este campo en su propia cuenta.'
-            self.fields['is_active'].help_text = 'No puede modificar este campo en su propia cuenta.'
+            for nombre in ('is_staff', 'is_active'):
+                # Bloqueado en el servidor: se ignora lo que llegue en el POST.
+                self.fields[nombre].disabled = True
+                self.fields[nombre].value = getattr(instance, nombre)
+                self.fields[nombre].help_text = 'No puede modificar este campo en su propia cuenta.'
 
     def save(self, commit=True):
         usuario = self.instance
@@ -510,6 +626,7 @@ class DatosEditarUsuario(BaseEntradaManual):
 class DatosPasswordUsuario(BaseEntradaManual):
     form_fields = ['new_password1', 'new_password2']
     labels = {'new_password1': 'Nueva contraseña', 'new_password2': 'Confirmar contraseña'}
+    help_texts = {'new_password1': 'Si cambia la clave de otro usuario, quedará como temporal y deberá cambiarla al ingresar.'}
     widgets = {'new_password1': ManualWidget('password'), 'new_password2': ManualWidget('password')}
 
     def __init__(self, usuario, data=None, **kwargs):

@@ -1,0 +1,30 @@
+# Integración continua: ejecuta las pruebas y mide la cobertura en cada push y pull request.
+name: Pruebas
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    env:
+      DB_ENGINE: sqlite
+      DJANGO_DEBUG: 'True'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Instalar dependencias
+        run: pip install -r requirements-dev.txt
+      - name: Revisar migraciones pendientes
+        run: python manage.py makemigrations --check --dry-run
+      - name: Pruebas con cobertura
+        run: |
+          coverage run manage.py test courier
+          coverage report

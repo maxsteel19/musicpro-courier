@@ -1,5 +1,5 @@
 {% extends "courier/gestion/_lista_base.html" %}
-{% block placeholder %}Nombre, RUT o licencia{% endblock %}
+{% block placeholder %}Nombre, licencia o RUT completo{% endblock %}
 {% block filtros %}
 <div class="col-6 col-md-2">
     <label class="form-label small text-muted-custom mb-1" for="estado">Estado</label>
@@ -12,7 +12,7 @@
 {% endblock %}
 {% block url_nuevo %}{% url 'courier:conductor_crear' %}{% endblock %}
 {% block texto_nuevo %}Nuevo conductor{% endblock %}
-{% block columnas %}<th>Nombre</th><th>RUT</th><th>Licencia</th><th>Teléfono</th><th class="text-center">Viajes (finalizados)</th><th>Estado</th>{% endblock %}
+{% block columnas %}<th>Nombre</th><th>RUT <i class="fas fa-lock small text-muted-custom" title="Guardado cifrado en la base de datos"></i></th><th>Licencia</th><th>Teléfono <i class="fas fa-lock small text-muted-custom" title="Guardado cifrado en la base de datos"></i></th><th class="text-center">Viajes (finalizados)</th><th>Estado</th>{% endblock %}
 {% block filas %}
 {% for c in pagina %}
 <tr>

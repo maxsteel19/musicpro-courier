@@ -93,7 +93,8 @@ class CrudEntidadesTests(PruebaBase):
         self.assertFalse(vehiculo.disponible)  # en mantención no queda disponible
         self.client.post(reverse('courier:conductor_crear'), {
             'rut': '76543216', 'nombre': 'Luis', 'licencia': 'B', 'activo': 'on'})
-        self.assertTrue(Conductor.objects.filter(rut='7.654.321-6').exists())
+        # El RUT está cifrado: se busca por su huella y se lee ya descifrado y normalizado.
+        self.assertEqual(Conductor.objects.con_rut('7.654.321-6').get().rut, '7.654.321-6')
 
     def test_busqueda_y_filtros_en_listados(self):
         respuesta = self.client.get(reverse('courier:vehiculo_lista'), {'q': 'Volvo'})

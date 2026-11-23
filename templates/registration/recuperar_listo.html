@@ -1,0 +1,11 @@
+{% extends "registration/base_auth.html" %}
+{% block title %}Contraseña actualizada{% endblock %}
+{% block bajada %}Recuperar el acceso a su cuenta{% endblock %}
+{% block content %}
+<div class="text-center">
+    <i class="fas fa-circle-check fa-3x mb-3" style="color:var(--success);"></i>
+    <p>Su contraseña fue actualizada. Si la cuenta estaba bloqueada por intentos fallidos, ya quedó desbloqueada.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary-custom w-100 py-2"><i class="fas fa-right-to-bracket me-1"></i>Iniciar sesión</a>
+</div>
+{% endblock %}
+{% block pie %}<a href="{% url 'courier:inicio' %}" class="text-muted-custom text-decoration-none"><i class="fas fa-arrow-left me-1"></i>Volver al sitio público</a>{% endblock %}

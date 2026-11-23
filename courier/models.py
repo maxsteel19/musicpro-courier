@@ -1,6 +1,11 @@
 from django.conf import settings
-from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+from django.core.validators import MaxLengthValidator, MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
+
+from .cifrado import CampoCifrado, huella
+from .validators import normalizar_rut
 
 # ===========================================================================
 # Módulo Courier (Evaluación 2): sucursales, paquetes, envíos, incidencias
@@ -99,15 +104,41 @@ class Vehiculo(models.Model):
         ordering = ['patente']
 
 
+def _rut_para_huella(rut):
+    try:
+        return normalizar_rut(rut)
+    except ValidationError:
+        return (rut or '').strip().upper()
+
+
+class ConductorQuerySet(models.QuerySet):
+    def con_rut(self, rut):
+        """Busca por RUT. Como el RUT está cifrado, se compara su huella (HMAC)."""
+        try:
+            rut = normalizar_rut(rut)
+        except ValidationError:
+            return self.none()
+        return self.filter(rut_huella=huella(rut))
+
+
 class Conductor(models.Model):
-    rut = models.CharField('RUT', max_length=20, unique=True)
+    # Datos personales cifrados en la base de datos (ver courier/cifrado.py).
+    rut = CampoCifrado('RUT', validators=[MaxLengthValidator(20)])
+    rut_huella = models.CharField(max_length=64, unique=True, editable=False)
     nombre = models.CharField(max_length=150)
     licencia = models.CharField(max_length=30)
-    telefono = models.CharField(max_length=30, blank=True)
+    telefono = CampoCifrado('teléfono', blank=True, validators=[MaxLengthValidator(30)])
     activo = models.BooleanField(default=True)
+
+    objects = ConductorQuerySet.as_manager()
 
     def __str__(self):
         return self.nombre
+
+    def save(self, *args, **kwargs):
+        # La huella permite exigir RUT único y buscar sin guardar el RUT en claro.
+        self.rut_huella = huella(_rut_para_huella(self.rut))
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Conductor'
@@ -248,3 +279,123 @@ class Notificacion(models.Model):
         verbose_name = 'Notificación'
         verbose_name_plural = 'Notificaciones'
         ordering = ['-fecha_envio']
+
+
+# ===========================================================================
+# Seguridad: perfil de cuenta, bloqueo por intentos fallidos y auditoría
+# ===========================================================================
+
+
+class PerfilUsuario(models.Model):
+    """Datos de seguridad de cada cuenta que no están en el usuario de Django."""
+
+    usuario = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='perfil')
+    debe_cambiar_password = models.BooleanField(
+        default=False, help_text='La contraseña es temporal: se exige cambiarla al ingresar.')
+    acuerdo_version = models.CharField('versión del acuerdo aceptado', max_length=10, blank=True)
+    acuerdo_aceptado_en = models.DateTimeField(null=True, blank=True)
+    acuerdo_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    def __str__(self):
+        return f'Perfil de {self.usuario}'
+
+    @classmethod
+    def de(cls, usuario):
+        perfil, _ = cls.objects.get_or_create(usuario=usuario)
+        return perfil
+
+    @property
+    def acepto_acuerdo_vigente(self):
+        return self.acuerdo_version == settings.VERSION_ACUERDO_DATOS
+
+    class Meta:
+        verbose_name = 'Perfil de usuario'
+        verbose_name_plural = 'Perfiles de usuario'
+
+
+class BloqueoAcceso(models.Model):
+    """Intentos fallidos de inicio de sesión por nombre de usuario.
+
+    Se registra por nombre (exista o no la cuenta) para no revelar qué
+    usuarios existen: el sistema responde igual en ambos casos.
+    """
+
+    username = models.CharField(max_length=150, unique=True)
+    intentos_fallidos = models.PositiveIntegerField(default=0)
+    bloqueado_hasta = models.DateTimeField(null=True, blank=True)
+    ultimo_intento = models.DateTimeField(auto_now=True)
+    ultima_ip = models.GenericIPAddressField(null=True, blank=True)
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def esta_bloqueado(self):
+        return bool(self.bloqueado_hasta and self.bloqueado_hasta > timezone.now())
+
+    @property
+    def minutos_restantes(self):
+        if not self.esta_bloqueado:
+            return 0
+        return max(1, round((self.bloqueado_hasta - timezone.now()).total_seconds() / 60))
+
+    class Meta:
+        verbose_name = 'Bloqueo de acceso'
+        verbose_name_plural = 'Bloqueos de acceso'
+
+
+class RegistroAuditoria(models.Model):
+    """Bitácora de seguridad (Ley 21.459 de delitos informáticos).
+
+    Solo se agregan registros: no existe ninguna vista para editarlos ni
+    borrarlos, y el modelo impide modificar un registro ya guardado.
+    """
+
+    ACCIONES = [
+        ('login', 'Inicio de sesión'),
+        ('login_fallido', 'Inicio de sesión fallido'),
+        ('bloqueo', 'Cuenta bloqueada'),
+        ('desbloqueo', 'Cuenta desbloqueada'),
+        ('logout', 'Cierre de sesión'),
+        ('crear', 'Creación'),
+        ('editar', 'Modificación'),
+        ('eliminar', 'Eliminación'),
+        ('password', 'Cambio de contraseña'),
+        ('recuperacion', 'Recuperación de contraseña'),
+        ('acuerdo', 'Acuerdo de uso de datos'),
+        ('acceso_denegado', 'Acceso denegado'),
+    ]
+
+    fecha = models.DateTimeField(default=timezone.now, db_index=True)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True,
+                                related_name='registros_auditoria')
+    username = models.CharField('nombre de usuario', max_length=150, blank=True)
+    accion = models.CharField(max_length=20, choices=ACCIONES, db_index=True)
+    modelo = models.CharField(max_length=60, blank=True)
+    objeto_id = models.CharField(max_length=40, blank=True)
+    descripcion = models.CharField('descripción', max_length=300, blank=True)
+    ip = models.GenericIPAddressField('IP', null=True, blank=True)
+    navegador = models.CharField(max_length=200, blank=True)
+
+    CLASES_CSS = {
+        'login_fallido': 'estado-bad', 'bloqueo': 'estado-bad', 'acceso_denegado': 'estado-bad',
+        'eliminar': 'badge-alta', 'desbloqueo': 'badge-alta', 'password': 'badge-alta', 'recuperacion': 'badge-alta',
+        'login': 'estado-info', 'logout': 'estado-info', 'acuerdo': 'estado-info',
+    }
+
+    def __str__(self):
+        return f'{self.fecha:%d/%m/%Y %H:%M} {self.username} {self.get_accion_display()}'
+
+    @property
+    def clase_css(self):
+        return self.CLASES_CSS.get(self.accion, 'estado-ok')
+
+    def save(self, *args, **kwargs):
+        if self.pk is not None:
+            raise ValidationError('Los registros de auditoría no se pueden modificar.')
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Registro de auditoría'
+        verbose_name_plural = 'Registros de auditoría'
+        ordering = ['-fecha', '-id']

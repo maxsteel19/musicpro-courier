@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 
 from ..models import Sucursal
@@ -11,3 +12,11 @@ def inicio(request):
     """
     sucursales = Sucursal.objects.filter(activa=True).only('nombre', 'ciudad', 'direccion')
     return render(request, 'courier/publico/inicio.html', {'sucursales': sucursales})
+
+
+def privacidad(request):
+    """Política de privacidad y uso de datos (pública, sin sesión)."""
+    return render(request, 'courier/publico/privacidad.html', {
+        'version': settings.VERSION_ACUERDO_DATOS,
+        'max_intentos': settings.LOGIN_MAX_INTENTOS,
+    })

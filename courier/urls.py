@@ -7,6 +7,10 @@ app_name = 'courier'
 urlpatterns = [
     # Público
     path('', views.inicio, name='inicio'),
+    path('privacidad/', views.privacidad, name='privacidad'),
+
+    # Acuerdo de uso de datos (requiere sesión)
+    path('acuerdo-datos/', views.acuerdo_datos, name='acuerdo_datos'),
 
     # Panel (requiere sesión)
     path('panel/', views.dashboard, name='dashboard'),
@@ -68,6 +72,8 @@ urlpatterns = [
     path('usuarios/<int:pk>/editar/', views.usuario_editar, name='usuario_editar'),
     path('usuarios/<int:pk>/password/', views.usuario_password, name='usuario_password'),
     path('usuarios/<int:pk>/estado/', views.usuario_cambiar_estado, name='usuario_cambiar_estado'),
+    path('usuarios/<int:pk>/desbloquear/', views.usuario_desbloquear, name='usuario_desbloquear'),
+    path('auditoria/', views.auditoria_lista, name='auditoria'),
     path('usuarios/<int:pk>/eliminar/', views.usuario_eliminar, name='usuario_eliminar'),
 
     # Reportes ORM
